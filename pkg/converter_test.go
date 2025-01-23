@@ -66,7 +66,7 @@ var _ = Describe("Converter", func() {
 			})
 			It("returns record with error msg in value", func() {
 				Expect(record).NotTo(BeNil())
-				Expect(record.Value).To(Equal("banana"))
+				Expect(record.Value).To(Equal("unmarshal json failed: invalid character 'b' looking for beginning of value"))
 			})
 		})
 	})

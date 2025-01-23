@@ -7,6 +7,7 @@ package pkg
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/IBM/sarama"
 	libkafka "github.com/bborbe/kafka"
@@ -35,7 +36,7 @@ func (c *converter) Convert(ctx context.Context, msg *sarama.ConsumerMessage) (*
 	if len(msg.Value) != 0 {
 		if err := json.Unmarshal(msg.Value, &record.Value); err != nil {
 			glog.V(4).Infof("unmarshal json failed: %v", err)
-			record.Value = string(msg.Value)
+			record.Value = fmt.Sprintf("unmarshal json failed: %v", err)
 		}
 	}
 	return &record, nil
