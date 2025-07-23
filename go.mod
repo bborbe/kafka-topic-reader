@@ -1,57 +1,55 @@
 module github.com/bborbe/kafka-topic-reader
 
-go 1.23.4
-
-replace github.com/bborbe/trading/lib => ../../lib
+go 1.24.5
 
 require (
-	github.com/IBM/sarama v1.45.0
+	github.com/IBM/sarama v1.45.2
 	github.com/actgardner/gogen-avro/v9 v9.2.0
 	github.com/bborbe/errors v1.3.0
-	github.com/bborbe/http v1.8.0
-	github.com/bborbe/kafka v1.9.2
-	github.com/bborbe/log v1.0.1
-	github.com/bborbe/run v1.5.5
-	github.com/bborbe/sentry v1.7.1
-	github.com/bborbe/service v1.4.0
-	github.com/golang/glog v1.2.4
+	github.com/bborbe/http v1.13.1
+	github.com/bborbe/kafka v1.13.7
+	github.com/bborbe/log v1.2.1
+	github.com/bborbe/run v1.7.5
+	github.com/bborbe/sentry v1.8.0
+	github.com/bborbe/service v1.6.2
+	github.com/golang/glog v1.2.5
 	github.com/google/addlicense v1.1.1
 	github.com/gorilla/mux v1.8.1
-	github.com/incu6us/goimports-reviser/v3 v3.8.2
-	github.com/kisielk/errcheck v1.8.0
-	github.com/maxbrunsfeld/counterfeiter/v6 v6.11.2
-	github.com/onsi/ginkgo/v2 v2.22.2
-	github.com/onsi/gomega v1.36.2
-	github.com/prometheus/client_golang v1.20.5
+	github.com/incu6us/goimports-reviser/v3 v3.9.1
+	github.com/kisielk/errcheck v1.9.0
+	github.com/maxbrunsfeld/counterfeiter/v6 v6.11.3
+	github.com/onsi/ginkgo/v2 v2.23.4
+	github.com/onsi/gomega v1.38.0
+	github.com/prometheus/client_golang v1.22.0
 	golang.org/x/lint v0.0.0-20241112194109-818c5a804067
 	golang.org/x/vuln v1.1.4
 )
 
 require (
-	github.com/bborbe/argument/v2 v2.1.3 // indirect
-	github.com/bborbe/collection v1.8.0 // indirect
-	github.com/bborbe/kv v1.11.3 // indirect
-	github.com/bborbe/math v1.1.1 // indirect
-	github.com/bborbe/parse v1.6.1 // indirect
-	github.com/bborbe/time v1.12.0 // indirect
-	github.com/bborbe/validation v1.2.0 // indirect
+	github.com/bborbe/argument/v2 v2.3.1 // indirect
+	github.com/bborbe/boltkv v1.10.2 // indirect
+	github.com/bborbe/collection v1.9.1 // indirect
+	github.com/bborbe/kv v1.14.1 // indirect
+	github.com/bborbe/math v1.2.0 // indirect
+	github.com/bborbe/memorykv v1.3.1 // indirect
+	github.com/bborbe/parse v1.7.1 // indirect
+	github.com/bborbe/time v1.16.2 // indirect
+	github.com/bborbe/validation v1.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bmatcuk/doublestar/v4 v4.8.0 // indirect
+	github.com/bmatcuk/doublestar/v4 v4.9.0 // indirect
 	github.com/certifi/gocertifi v0.0.0-20210507211836-431795d63e8d // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dgraph-io/badger/v4 v4.5.1 // indirect
 	github.com/eapache/go-resiliency v1.7.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/getsentry/raven-go v0.2.0 // indirect
-	github.com/getsentry/sentry-go v0.31.1 // indirect
-	github.com/go-logr/logr v1.4.2 // indirect
+	github.com/getsentry/sentry-go v0.34.1 // indirect
+	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
-	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/flatbuffers v25.1.21+incompatible // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20250121033306-997b0b79cac0 // indirect
+	github.com/golang/snappy v1.0.0 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
+	github.com/google/pprof v0.0.0-20250630185457-6e76a2b096b5 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
@@ -61,23 +59,24 @@ require (
 	github.com/jcmturner/gofork v1.7.6 // indirect
 	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
-	github.com/klauspost/compress v1.17.11 // indirect
+	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.62.0 // indirect
-	github.com/prometheus/procfs v0.15.1 // indirect
-	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
-	golang.org/x/crypto v0.32.0 // indirect
-	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8 // indirect
-	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/telemetry v0.0.0-20250117155846-04cd7bae618c // indirect
-	golang.org/x/text v0.21.0 // indirect
-	golang.org/x/tools v0.29.0 // indirect
-	google.golang.org/protobuf v1.36.3 // indirect
+	github.com/prometheus/client_model v0.6.2 // indirect
+	github.com/prometheus/common v0.65.0 // indirect
+	github.com/prometheus/procfs v0.17.0 // indirect
+	github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9 // indirect
+	go.uber.org/automaxprocs v1.6.0 // indirect
+	golang.org/x/crypto v0.40.0 // indirect
+	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792 // indirect
+	golang.org/x/mod v0.26.0 // indirect
+	golang.org/x/net v0.42.0 // indirect
+	golang.org/x/sync v0.16.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
+	golang.org/x/telemetry v0.0.0-20250721140356-96f361d9aaf7 // indirect
+	golang.org/x/text v0.27.0 // indirect
+	golang.org/x/tools v0.35.0 // indirect
+	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
