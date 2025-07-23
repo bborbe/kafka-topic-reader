@@ -28,6 +28,7 @@ type Record struct {
 
 type Records []Record
 
+//counterfeiter:generate -o ../mocks/changes-provider.go --fake-name ChangesProvider . ChangesProvider
 type ChangesProvider interface {
 	Changes(
 		ctx context.Context,
