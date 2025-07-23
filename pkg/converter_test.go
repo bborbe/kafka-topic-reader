@@ -20,6 +20,7 @@ var _ = Describe("Converter", func() {
 	var converter pkg.Converter
 	var msg *sarama.ConsumerMessage
 	var record *pkg.Record
+
 	BeforeEach(func() {
 		ctx = context.Background()
 		converter = pkg.NewConverter()
@@ -30,29 +31,59 @@ var _ = Describe("Converter", func() {
 					Value: []byte("v"),
 				},
 			},
-			Key:   []byte(`my-key`),
-			Value: []byte(`{"a":"b"}`),
+			Key:       []byte(`my-key`),
+			Value:     []byte(`{"a":"b"}`),
+			Topic:     "test-topic",
+			Partition: 2,
+			Offset:    123,
 		}
 	})
+
+	Context("NewConverter", func() {
+		It("returns converter", func() {
+			Expect(converter).NotTo(BeNil())
+		})
+	})
+
 	Context("Convert", func() {
 		JustBeforeEach(func() {
 			record, err = converter.Convert(ctx, msg)
 		})
-		Context("success", func() {
+
+		Context("successful conversion with valid JSON", func() {
 			It("returns no error", func() {
 				Expect(err).To(BeNil())
 			})
+
 			It("returns record", func() {
 				Expect(record).NotTo(BeNil())
 			})
+
 			It("returns record with correct key", func() {
 				Expect(record).NotTo(BeNil())
 				Expect(record.Key).To(Equal("my-key"))
 			})
+
 			It("returns record with correct value", func() {
 				Expect(record).NotTo(BeNil())
 				Expect(record.Value).To(HaveKeyWithValue("a", "b"))
 			})
+
+			It("returns record with correct topic", func() {
+				Expect(record).NotTo(BeNil())
+				Expect(string(record.Topic)).To(Equal("test-topic"))
+			})
+
+			It("returns record with correct partition", func() {
+				Expect(record).NotTo(BeNil())
+				Expect(int32(record.Partition)).To(Equal(int32(2)))
+			})
+
+			It("returns record with correct offset", func() {
+				Expect(record).NotTo(BeNil())
+				Expect(int64(record.Offset)).To(Equal(int64(123)))
+			})
+
 			It("has header", func() {
 				Expect(record).NotTo(BeNil())
 				Expect(record.Header).To(HaveLen(1))
@@ -60,13 +91,175 @@ var _ = Describe("Converter", func() {
 				Expect(record.Header.Get("k")).To(Equal("v"))
 			})
 		})
-		Context("unparse able json", func() {
+
+		Context("with multiple headers", func() {
+			BeforeEach(func() {
+				msg.Headers = []*sarama.RecordHeader{
+					{Key: []byte("header1"), Value: []byte("value1")},
+					{Key: []byte("header2"), Value: []byte("value2")},
+					{Key: []byte("header3"), Value: []byte("value3")},
+				}
+			})
+
+			It("parses all headers correctly", func() {
+				Expect(record.Header).To(HaveLen(3))
+				Expect(record.Header.Get("header1")).To(Equal("value1"))
+				Expect(record.Header.Get("header2")).To(Equal("value2"))
+				Expect(record.Header.Get("header3")).To(Equal("value3"))
+			})
+		})
+
+		Context("with no headers", func() {
+			BeforeEach(func() {
+				msg.Headers = nil
+			})
+
+			It("has empty header", func() {
+				Expect(record.Header).To(HaveLen(0))
+			})
+		})
+
+		Context("with empty key", func() {
+			BeforeEach(func() {
+				msg.Key = nil
+			})
+
+			It("returns record with empty key", func() {
+				Expect(record.Key).To(Equal(""))
+			})
+		})
+
+		Context("with complex JSON value", func() {
+			BeforeEach(func() {
+				msg.Value = []byte(`{
+					"string": "test",
+					"number": 42,
+					"boolean": true,
+					"null": null,
+					"array": [1, 2, "three"],
+					"object": {"nested": "value"}
+				}`)
+			})
+
+			It("parses complex JSON correctly", func() {
+				value, ok := record.Value.(map[string]interface{})
+				Expect(ok).To(BeTrue())
+				Expect(value["string"]).To(Equal("test"))
+				Expect(value["number"]).To(BeNumerically("==", 42))
+				Expect(value["boolean"]).To(Equal(true))
+				Expect(value["null"]).To(BeNil())
+
+				array, ok := value["array"].([]interface{})
+				Expect(ok).To(BeTrue())
+				Expect(array).To(HaveLen(3))
+				Expect(array[0]).To(BeNumerically("==", 1))
+				Expect(array[1]).To(BeNumerically("==", 2))
+				Expect(array[2]).To(Equal("three"))
+
+				obj, ok := value["object"].(map[string]interface{})
+				Expect(ok).To(BeTrue())
+				Expect(obj["nested"]).To(Equal("value"))
+			})
+		})
+
+		Context("with empty value", func() {
+			BeforeEach(func() {
+				msg.Value = []byte{}
+			})
+
+			It("returns record with nil value", func() {
+				Expect(record.Value).To(BeNil())
+			})
+		})
+
+		Context("with nil value", func() {
+			BeforeEach(func() {
+				msg.Value = nil
+			})
+
+			It("returns record with nil value", func() {
+				Expect(record.Value).To(BeNil())
+			})
+		})
+
+		Context("with unparseable JSON", func() {
 			BeforeEach(func() {
 				msg.Value = []byte("banana")
 			})
-			It("returns record with error msg in value", func() {
+
+			It("returns record with error message in value", func() {
 				Expect(record).NotTo(BeNil())
 				Expect(record.Value).To(Equal("unmarshal json failed: invalid character 'b' looking for beginning of value"))
+			})
+		})
+
+		Context("with malformed JSON", func() {
+			BeforeEach(func() {
+				msg.Value = []byte(`{"incomplete": `)
+			})
+
+			It("returns record with error message in value", func() {
+				Expect(record).NotTo(BeNil())
+				Expect(record.Value).To(ContainSubstring("unmarshal json failed:"))
+			})
+		})
+
+		Context("with JSON array", func() {
+			BeforeEach(func() {
+				msg.Value = []byte(`[1, 2, "three", {"key": "value"}]`)
+			})
+
+			It("parses JSON array correctly", func() {
+				array, ok := record.Value.([]interface{})
+				Expect(ok).To(BeTrue())
+				Expect(array).To(HaveLen(4))
+				Expect(array[0]).To(BeNumerically("==", 1))
+				Expect(array[1]).To(BeNumerically("==", 2))
+				Expect(array[2]).To(Equal("three"))
+
+				obj, ok := array[3].(map[string]interface{})
+				Expect(ok).To(BeTrue())
+				Expect(obj["key"]).To(Equal("value"))
+			})
+		})
+
+		Context("with JSON string value", func() {
+			BeforeEach(func() {
+				msg.Value = []byte(`"just a string"`)
+			})
+
+			It("parses JSON string correctly", func() {
+				Expect(record.Value).To(Equal("just a string"))
+			})
+		})
+
+		Context("with JSON number value", func() {
+			BeforeEach(func() {
+				msg.Value = []byte(`42`)
+			})
+
+			It("parses JSON number correctly", func() {
+				Expect(record.Value).To(BeNumerically("==", 42))
+			})
+		})
+
+		Context("with JSON boolean value", func() {
+			BeforeEach(func() {
+				msg.Value = []byte(`true`)
+			})
+
+			It("parses JSON boolean correctly", func() {
+				Expect(record.Value).To(Equal(true))
+			})
+		})
+
+		Context("with JSON null value", func() {
+			BeforeEach(func() {
+				msg.Value = []byte(`null`)
+			})
+
+			It("parses JSON null correctly", func() {
+				Expect(record.Value).To(BeNil())
 			})
 		})
 	})
