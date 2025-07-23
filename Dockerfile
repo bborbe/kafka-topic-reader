@@ -1,7 +1,7 @@
 FROM golang:1.23.4 AS build
 COPY . /workspace
 WORKDIR /workspace
-RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -ldflags "-s" -a -installsuffix cgo -o /main
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=mod -ldflags "-s" -a -installsuffix cgo -o /main
 CMD ["/bin/bash"]
 
 FROM alpine:3.21 AS alpine

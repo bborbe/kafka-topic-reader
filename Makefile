@@ -20,25 +20,25 @@ precommit: ensure format generate test check
 ensure:
 	go mod tidy
 	go mod verify
-	go mod vendor
+	rm -rf vendor
 
 format:
-	go run -mod=vendor github.com/incu6us/goimports-reviser/v3 -project-name github.com/bborbe/kafka-topic-reader -format -excludes vendor ./...
+	go run -mod=mod github.com/incu6us/goimports-reviser/v3 -project-name github.com/bborbe/kafka-topic-reader -format -excludes vendor ./...
 
 generate:
 	rm -rf mocks avro
-	go generate -mod=vendor ./...
+	go generate -mod=mod ./...
 
 test:
-	go test -mod=vendor -p=$${GO_TEST_PARALLEL:-1} -cover -race $(shell go list -mod=vendor ./... | grep -v /vendor/)
+	go test -mod=mod -p=$${GO_TEST_PARALLEL:-1} -cover -race $(shell go list -mod=mod ./... | grep -v /vendor/)
 
 check: vet errcheck vulncheck
 
 vet:
-	go vet -mod=vendor $(shell go list -mod=vendor ./... | grep -v /vendor/)
+	go vet -mod=mod $(shell go list -mod=mod ./... | grep -v /vendor/)
 
 errcheck:
-	go run -mod=vendor github.com/kisielk/errcheck -ignore '(Close|Write|Fprint)' $(shell go list -mod=vendor ./... | grep -v /vendor/)
+	go run -mod=mod github.com/kisielk/errcheck -ignore '(Close|Write|Fprint)' $(shell go list -mod=mod ./... | grep -v /vendor/)
 
 apply:
 	@for i in $(DIRS); do \
@@ -49,4 +49,4 @@ apply:
 	done
 
 vulncheck:
-	go run -mod=vendor golang.org/x/vuln/cmd/govulncheck $(shell go list -mod=vendor ./... | grep -v /vendor/)
+	go run -mod=mod golang.org/x/vuln/cmd/govulncheck $(shell go list -mod=mod ./... | grep -v /vendor/)
