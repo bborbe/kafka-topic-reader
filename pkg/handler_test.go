@@ -142,11 +142,12 @@ var _ = Describe("Handler", func() {
 
 			It("calls changes provider with correct parameters", func() {
 				Expect(changesProvider.ChangesCallCount()).To(Equal(1))
-				_, topic, partition, offset, limit := changesProvider.ChangesArgsForCall(0)
+				_, topic, partition, offset, limit, filter := changesProvider.ChangesArgsForCall(0)
 				Expect(topic).To(Equal(libkafka.Topic("test-topic")))
 				Expect(partition).To(Equal(libkafka.Partition(0)))
 				Expect(offset).To(Equal(libkafka.Offset(0)))
 				Expect(limit).To(Equal(uint64(100))) // default limit
+				Expect(filter).To(Equal([]byte{}))   // no filter specified
 			})
 
 			It("returns OK status", func() {
@@ -178,7 +179,7 @@ var _ = Describe("Handler", func() {
 
 			It("calls changes provider with custom limit", func() {
 				Expect(changesProvider.ChangesCallCount()).To(Equal(1))
-				_, _, _, _, limit := changesProvider.ChangesArgsForCall(0)
+				_, _, _, _, limit, _ := changesProvider.ChangesArgsForCall(0)
 				Expect(limit).To(Equal(uint64(50)))
 			})
 		})
@@ -197,7 +198,7 @@ var _ = Describe("Handler", func() {
 
 			It("uses default limit of 100", func() {
 				Expect(changesProvider.ChangesCallCount()).To(Equal(1))
-				_, _, _, _, limit := changesProvider.ChangesArgsForCall(0)
+				_, _, _, _, limit, _ := changesProvider.ChangesArgsForCall(0)
 				Expect(limit).To(Equal(uint64(100)))
 			})
 		})
@@ -219,14 +220,14 @@ var _ = Describe("Handler", func() {
 				Expect(changesProvider.ChangesCallCount()).To(Equal(2))
 
 				// First call with original offset
-				_, topic1, partition1, offset1, limit1 := changesProvider.ChangesArgsForCall(0)
+				_, topic1, partition1, offset1, limit1, _ := changesProvider.ChangesArgsForCall(0)
 				Expect(topic1).To(Equal(libkafka.Topic("test-topic")))
 				Expect(partition1).To(Equal(libkafka.Partition(0)))
 				Expect(offset1).To(Equal(libkafka.Offset(1000)))
 				Expect(limit1).To(Equal(uint64(100)))
 
 				// Second call with oldest offset
-				_, topic2, partition2, offset2, limit2 := changesProvider.ChangesArgsForCall(1)
+				_, topic2, partition2, offset2, limit2, _ := changesProvider.ChangesArgsForCall(1)
 				Expect(topic2).To(Equal(libkafka.Topic("test-topic")))
 				Expect(partition2).To(Equal(libkafka.Partition(0)))
 				Expect(offset2).To(Equal(libkafka.OffsetOldest))
@@ -312,6 +313,42 @@ var _ = Describe("Handler", func() {
 					body := response.Body.String()
 					Expect(body).To(ContainSubstring(`"nextOffset":5`))
 				})
+			})
+		})
+
+		Context("with filter parameter", func() {
+			BeforeEach(func() {
+				request = httptest.NewRequest("GET", "/read?topic=test-topic&partition=0&offset=0&filter=test-value", nil)
+				records := pkg.Records{
+					{Key: "key1", Value: "test-value here", Offset: libkafka.Offset(1)},
+				}
+				changesProvider.ChangesReturns(records, nil)
+			})
+
+			It("returns no error", func() {
+				Expect(err).To(BeNil())
+			})
+
+			It("passes filter to changes provider", func() {
+				Expect(changesProvider.ChangesCallCount()).To(Equal(1))
+				_, _, _, _, _, filter := changesProvider.ChangesArgsForCall(0)
+				Expect(filter).To(Equal([]byte("test-value")))
+			})
+		})
+
+		Context("with empty filter parameter", func() {
+			BeforeEach(func() {
+				request = httptest.NewRequest("GET", "/read?topic=test-topic&partition=0&offset=0&filter=", nil)
+				records := pkg.Records{
+					{Key: "key1", Value: "any value", Offset: libkafka.Offset(1)},
+				}
+				changesProvider.ChangesReturns(records, nil)
+			})
+
+			It("passes empty filter to changes provider", func() {
+				Expect(changesProvider.ChangesCallCount()).To(Equal(1))
+				_, _, _, _, _, filter := changesProvider.ChangesArgsForCall(0)
+				Expect(filter).To(Equal([]byte{}))
 			})
 		})
 	})

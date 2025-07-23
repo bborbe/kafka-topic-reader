@@ -8,6 +8,15 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.3.0
+
+- add binary filtering functionality to `/read` endpoint
+- add optional `filter` query parameter for exact binary pattern matching
+- filter performs case-sensitive substring search in raw Kafka message values
+- split `pkg/changes.go` into separate files by type (`record.go` and `changes-provider.go`)
+- add comprehensive tests for binary filtering functionality
+- improve test coverage to 52.2%
+
 ## v1.2.0
 
 - add tests for all important files

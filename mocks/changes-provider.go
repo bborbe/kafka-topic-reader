@@ -10,7 +10,7 @@ import (
 )
 
 type ChangesProvider struct {
-	ChangesStub        func(context.Context, kafka.Topic, kafka.Partition, kafka.Offset, uint64) (pkg.Records, error)
+	ChangesStub        func(context.Context, kafka.Topic, kafka.Partition, kafka.Offset, uint64, []byte) (pkg.Records, error)
 	changesMutex       sync.RWMutex
 	changesArgsForCall []struct {
 		arg1 context.Context
@@ -18,6 +18,7 @@ type ChangesProvider struct {
 		arg3 kafka.Partition
 		arg4 kafka.Offset
 		arg5 uint64
+		arg6 []byte
 	}
 	changesReturns struct {
 		result1 pkg.Records
@@ -31,7 +32,12 @@ type ChangesProvider struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *ChangesProvider) Changes(arg1 context.Context, arg2 kafka.Topic, arg3 kafka.Partition, arg4 kafka.Offset, arg5 uint64) (pkg.Records, error) {
+func (fake *ChangesProvider) Changes(arg1 context.Context, arg2 kafka.Topic, arg3 kafka.Partition, arg4 kafka.Offset, arg5 uint64, arg6 []byte) (pkg.Records, error) {
+	var arg6Copy []byte
+	if arg6 != nil {
+		arg6Copy = make([]byte, len(arg6))
+		copy(arg6Copy, arg6)
+	}
 	fake.changesMutex.Lock()
 	ret, specificReturn := fake.changesReturnsOnCall[len(fake.changesArgsForCall)]
 	fake.changesArgsForCall = append(fake.changesArgsForCall, struct {
@@ -40,13 +46,14 @@ func (fake *ChangesProvider) Changes(arg1 context.Context, arg2 kafka.Topic, arg
 		arg3 kafka.Partition
 		arg4 kafka.Offset
 		arg5 uint64
-	}{arg1, arg2, arg3, arg4, arg5})
+		arg6 []byte
+	}{arg1, arg2, arg3, arg4, arg5, arg6Copy})
 	stub := fake.ChangesStub
 	fakeReturns := fake.changesReturns
-	fake.recordInvocation("Changes", []interface{}{arg1, arg2, arg3, arg4, arg5})
+	fake.recordInvocation("Changes", []interface{}{arg1, arg2, arg3, arg4, arg5, arg6Copy})
 	fake.changesMutex.Unlock()
 	if stub != nil {
-		return stub(arg1, arg2, arg3, arg4, arg5)
+		return stub(arg1, arg2, arg3, arg4, arg5, arg6)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -60,17 +67,17 @@ func (fake *ChangesProvider) ChangesCallCount() int {
 	return len(fake.changesArgsForCall)
 }
 
-func (fake *ChangesProvider) ChangesCalls(stub func(context.Context, kafka.Topic, kafka.Partition, kafka.Offset, uint64) (pkg.Records, error)) {
+func (fake *ChangesProvider) ChangesCalls(stub func(context.Context, kafka.Topic, kafka.Partition, kafka.Offset, uint64, []byte) (pkg.Records, error)) {
 	fake.changesMutex.Lock()
 	defer fake.changesMutex.Unlock()
 	fake.ChangesStub = stub
 }
 
-func (fake *ChangesProvider) ChangesArgsForCall(i int) (context.Context, kafka.Topic, kafka.Partition, kafka.Offset, uint64) {
+func (fake *ChangesProvider) ChangesArgsForCall(i int) (context.Context, kafka.Topic, kafka.Partition, kafka.Offset, uint64, []byte) {
 	fake.changesMutex.RLock()
 	defer fake.changesMutex.RUnlock()
 	argsForCall := fake.changesArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4, argsForCall.arg5
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4, argsForCall.arg5, argsForCall.arg6
 }
 
 func (fake *ChangesProvider) ChangesReturns(result1 pkg.Records, result2 error) {

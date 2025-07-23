@@ -47,14 +47,16 @@ func NewHandler(
 			return errors.Wrap(ctx, err, "parse parameter partition failed")
 		}
 
+		filter := []byte(req.FormValue("filter"))
+
 		glog.V(2).Infof("read records from topic %s and partition %d and offset %d with limit %d started", topic, partition.Int32(), offset.Int64(), limit)
-		changes, err := changesProvider.Changes(ctx, topic, *partition, *offset, limit)
+		changes, err := changesProvider.Changes(ctx, topic, *partition, *offset, limit, filter)
 		if err != nil {
 			if errors.Is(err, sarama.ErrOffsetOutOfRange) == false {
 				return errors.Wrap(ctx, err, "get changes failed")
 			}
 			glog.V(2).Infof("offset out of range error => fallbacktest to oldest")
-			changes, err = changesProvider.Changes(ctx, topic, *partition, libkafka.OffsetOldest, limit)
+			changes, err = changesProvider.Changes(ctx, topic, *partition, libkafka.OffsetOldest, limit, filter)
 			if err != nil {
 				return errors.Wrap(ctx, err, "get changes failed")
 			}

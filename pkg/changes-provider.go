@@ -5,6 +5,7 @@
 package pkg
 
 import (
+	"bytes"
 	"context"
 	"runtime"
 
@@ -25,6 +26,7 @@ type ChangesProvider interface {
 		partition libkafka.Partition,
 		offset libkafka.Offset,
 		limit uint64,
+		filter []byte,
 	) (Records, error)
 }
 
@@ -42,6 +44,22 @@ func NewChangesProvider(
 	}
 }
 
+// MatchesFilter checks if a Kafka message matches the given filter bytes.
+// If filter is empty, all messages match. Otherwise, performs exact
+// byte substring search in the raw binary message value.
+func MatchesFilter(msg *sarama.ConsumerMessage, filter []byte) bool {
+	if len(filter) == 0 {
+		return true // No filtering
+	}
+
+	if len(msg.Value) == 0 {
+		return false // No value to search
+	}
+
+	// Exact byte matching for binary data
+	return bytes.Contains(msg.Value, filter)
+}
+
 type changesProvider struct {
 	saramaClient      libkafka.SaramaClient
 	converter         Converter
@@ -55,6 +73,7 @@ func (c *changesProvider) Changes(
 	partition libkafka.Partition,
 	offset libkafka.Offset,
 	limit uint64,
+	filter []byte,
 ) (Records, error) {
 	var records Records
 	ch := make(chan Record, runtime.NumCPU())
@@ -96,10 +115,16 @@ func (c *changesProvider) Changes(
 				offset,
 				libkafka.MessageHanderList{
 					libkafka.MessageHandlerFunc(func(ctx context.Context, msg *sarama.ConsumerMessage) error {
+						// Apply filter if specified (before conversion for efficiency)
+						if !MatchesFilter(msg, filter) {
+							return nil // Skip this record, continue processing
+						}
+
 						record, err := c.converter.Convert(ctx, msg)
 						if err != nil {
 							return errors.Wrap(ctx, err, "convert msg to record failed")
 						}
+
 						select {
 						case <-ctx.Done():
 							return ctx.Err()
