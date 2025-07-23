@@ -17,17 +17,6 @@ import (
 	"github.com/golang/glog"
 )
 
-type Record struct {
-	Key       string             `json:"key"`
-	Value     interface{}        `json:"value"`
-	Offset    libkafka.Offset    `json:"offset"`
-	Partition libkafka.Partition `json:"partition"`
-	Topic     libkafka.Topic     `json:"topic"`
-	Header    libkafka.Header    `json:"header"`
-}
-
-type Records []Record
-
 //counterfeiter:generate -o ../mocks/changes-provider.go --fake-name ChangesProvider . ChangesProvider
 type ChangesProvider interface {
 	Changes(
@@ -36,6 +25,7 @@ type ChangesProvider interface {
 		partition libkafka.Partition,
 		offset libkafka.Offset,
 		limit uint64,
+		filter []byte,
 	) (Records, error)
 }
 
@@ -66,6 +56,7 @@ func (c *changesProvider) Changes(
 	partition libkafka.Partition,
 	offset libkafka.Offset,
 	limit uint64,
+	filter []byte,
 ) (Records, error) {
 	var records Records
 	ch := make(chan Record, runtime.NumCPU())
@@ -107,10 +98,16 @@ func (c *changesProvider) Changes(
 				offset,
 				libkafka.MessageHanderList{
 					libkafka.MessageHandlerFunc(func(ctx context.Context, msg *sarama.ConsumerMessage) error {
+						// Apply filter if specified (before conversion for efficiency)
+						if !MatchesFilter(msg, filter) {
+							return nil // Skip this record, continue processing
+						}
+
 						record, err := c.converter.Convert(ctx, msg)
 						if err != nil {
 							return errors.Wrap(ctx, err, "convert msg to record failed")
 						}
+
 						select {
 						case <-ctx.Done():
 							return ctx.Err()
