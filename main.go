@@ -20,7 +20,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/bborbe/kafka-topic-reader/pkg"
+	"github.com/bborbe/kafka-topic-reader/pkg/factory"
 )
 
 func main() {
@@ -64,19 +64,7 @@ func (a *application) createHttpServer(
 		router.Path("/readiness").Handler(libhttp.NewPrintHandler("OK"))
 		router.Path("/metrics").Handler(promhttp.Handler())
 		router.Path("/setloglevel/{level}").Handler(log.NewSetLoglevelHandler(ctx, log.NewLogLevelSetter(2, 5*time.Minute)))
-
-		router.Path("/read").Handler(
-			libhttp.NewErrorHandler(
-				pkg.NewHandler(
-					pkg.NewChangesProvider(
-						sentryClient,
-						saramaClient,
-						pkg.NewConverter(),
-						log.DefaultSamplerFactory,
-					),
-				),
-			),
-		)
+		router.Path("/read").Handler(factory.CreateReadHandler(sentryClient, saramaClient))
 
 		glog.V(2).Infof("starting http server listen on %s", a.Listen)
 		return libhttp.NewServer(

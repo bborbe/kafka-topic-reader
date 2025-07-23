@@ -8,6 +8,14 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.3.1
+
+- refactor MatchesFilter function to separate filter.go file with dedicated tests
+- add pkg factory pattern for clean dependency injection and handler creation
+- improve code organization by separating filtering logic from changes provider
+- add comprehensive unit tests for factory pattern
+- update main.go to use factory pattern for handler creation
+
 ## v1.3.0
 
 - add binary filtering functionality to `/read` endpoint
