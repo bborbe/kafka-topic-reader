@@ -14,6 +14,7 @@ import (
 	"github.com/golang/glog"
 )
 
+//counterfeiter:generate -o ../mocks/converter.go --fake-name Converter . Converter
 type Converter interface {
 	Convert(ctx context.Context, msg *sarama.ConsumerMessage) (*Record, error)
 }
