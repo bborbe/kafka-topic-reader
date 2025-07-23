@@ -5,7 +5,6 @@ go 1.24.5
 require (
 	github.com/IBM/sarama v1.45.2
 	github.com/actgardner/gogen-avro/v9 v9.2.0
-	github.com/bborbe/collection v1.9.1
 	github.com/bborbe/errors v1.3.0
 	github.com/bborbe/http v1.13.1
 	github.com/bborbe/kafka v1.13.7
@@ -13,7 +12,6 @@ require (
 	github.com/bborbe/run v1.7.5
 	github.com/bborbe/sentry v1.8.0
 	github.com/bborbe/service v1.6.2
-	github.com/getsentry/sentry-go v0.34.1
 	github.com/golang/glog v1.2.5
 	github.com/google/addlicense v1.1.1
 	github.com/gorilla/mux v1.8.1
@@ -30,6 +28,7 @@ require (
 require (
 	github.com/bborbe/argument/v2 v2.3.1 // indirect
 	github.com/bborbe/boltkv v1.10.2 // indirect
+	github.com/bborbe/collection v1.9.1 // indirect
 	github.com/bborbe/kv v1.14.1 // indirect
 	github.com/bborbe/math v1.2.0 // indirect
 	github.com/bborbe/memorykv v1.3.1 // indirect
@@ -45,6 +44,7 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/getsentry/raven-go v0.2.0 // indirect
+	github.com/getsentry/sentry-go v0.34.1 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
