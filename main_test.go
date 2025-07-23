@@ -15,7 +15,7 @@ import (
 var _ = Describe("Kafka Topic Reader", func() {
 	It("Compiles", func() {
 		var err error
-		_, err = gexec.Build("github.com/bborbe/kafka-topic-reader", "-mod=vendor")
+		_, err = gexec.Build("github.com/bborbe/kafka-topic-reader", "-mod=mod")
 		Expect(err).NotTo(HaveOccurred())
 	})
 })
