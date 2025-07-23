@@ -17,17 +17,6 @@ import (
 	"github.com/golang/glog"
 )
 
-type Record struct {
-	Key       string             `json:"key"`
-	Value     interface{}        `json:"value"`
-	Offset    libkafka.Offset    `json:"offset"`
-	Partition libkafka.Partition `json:"partition"`
-	Topic     libkafka.Topic     `json:"topic"`
-	Header    libkafka.Header    `json:"header"`
-}
-
-type Records []Record
-
 //counterfeiter:generate -o ../mocks/changes-provider.go --fake-name ChangesProvider . ChangesProvider
 type ChangesProvider interface {
 	Changes(
