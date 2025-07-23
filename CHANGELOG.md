@@ -8,6 +8,13 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.3.2
+
+- add input validation for filter parameter with maximum length check (1024 bytes)
+- add comprehensive tests for filter parameter validation
+- update API documentation to include filter parameter limits
+- improve security by preventing potential DoS attacks via oversized filter parameters
+
 ## v1.3.1
 
 - refactor MatchesFilter function to separate filter.go file with dedicated tests

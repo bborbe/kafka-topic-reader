@@ -351,5 +351,25 @@ var _ = Describe("Handler", func() {
 				Expect(filter).To(Equal([]byte{}))
 			})
 		})
+
+		Context("with filter parameter exceeding maximum length", func() {
+			BeforeEach(func() {
+				// Create a filter that exceeds 1024 bytes
+				longFilter := make([]byte, 1025)
+				for i := range longFilter {
+					longFilter[i] = 'a'
+				}
+				request = httptest.NewRequest("GET", "/read?topic=test-topic&partition=0&offset=0&filter="+string(longFilter), nil)
+			})
+
+			It("returns an error for filter exceeding maximum length", func() {
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("filter parameter exceeds maximum length of 1024 bytes"))
+			})
+
+			It("does not call ChangesProvider", func() {
+				Expect(changesProvider.ChangesCallCount()).To(Equal(0))
+			})
+		})
 	})
 })

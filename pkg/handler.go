@@ -47,7 +47,11 @@ func NewHandler(
 			return errors.Wrap(ctx, err, "parse parameter partition failed")
 		}
 
-		filter := []byte(req.FormValue("filter"))
+		filterValue := req.FormValue("filter")
+		if len(filterValue) > 1024 {
+			return errors.New(ctx, "filter parameter exceeds maximum length of 1024 bytes")
+		}
+		filter := []byte(filterValue)
 
 		glog.V(2).Infof("read records from topic %s and partition %d and offset %d with limit %d started", topic, partition.Int32(), offset.Int64(), limit)
 		changes, err := changesProvider.Changes(ctx, topic, *partition, *offset, limit, filter)
