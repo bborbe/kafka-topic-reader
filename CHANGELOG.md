@@ -8,6 +8,16 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.5.0
+
+- add configurable error preview content length via ERROR_PREVIEW_CONTENT_LENGTH environment variable
+- add --error-preview-content-length flag to control error message preview size
+- add support for unlimited preview length with -1 value
+- add comprehensive tests for configurable preview length (10 bytes, unlimited, zero, larger than content)
+- update converter to accept errorPreviewContentLength parameter
+- update factory to pass preview length configuration through dependency chain
+- maintain backward compatibility with default 100 bytes preview length
+
 ## v1.4.1
 
 - improve JSON unmarshal error messages with structured format

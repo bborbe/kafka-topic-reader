@@ -16,12 +16,12 @@ import (
 var _ = Describe("Factory", func() {
 	Context("CreateReadHandler", func() {
 		It("returns a non-nil http.Handler", func() {
-			handler := factory.CreateReadHandler(nil, nil)
+			handler := factory.CreateReadHandler(nil, nil, 100)
 			Expect(handler).NotTo(BeNil())
 		})
 
 		It("implements http.Handler interface", func() {
-			handler := factory.CreateReadHandler(nil, nil)
+			handler := factory.CreateReadHandler(nil, nil, 100)
 			// Verify it implements http.Handler by using it as one
 			var _ http.Handler = handler
 			Expect(handler).NotTo(BeNil())
@@ -30,7 +30,7 @@ var _ = Describe("Factory", func() {
 		It("creates handler with factory pattern", func() {
 			// Test that the factory can create the handler even with nil dependencies
 			// This verifies the wiring is correct
-			handler := factory.CreateReadHandler(nil, nil)
+			handler := factory.CreateReadHandler(nil, nil, 100)
 			Expect(handler).NotTo(BeNil())
 		})
 	})

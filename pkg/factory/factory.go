@@ -18,13 +18,14 @@ import (
 func CreateReadHandler(
 	sentryClient sentry.Client,
 	saramaClient libkafka.SaramaClient,
+	errorPreviewContentLength int,
 ) http.Handler {
 	return libhttp.NewErrorHandler(
 		pkg.NewHandler(
 			pkg.NewChangesProvider(
 				sentryClient,
 				saramaClient,
-				pkg.NewConverter(),
+				pkg.NewConverter(errorPreviewContentLength),
 				log.DefaultSamplerFactory,
 			),
 		),

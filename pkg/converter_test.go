@@ -23,7 +23,7 @@ var _ = Describe("Converter", func() {
 
 	BeforeEach(func() {
 		ctx = context.Background()
-		converter = pkg.NewConverter()
+		converter = pkg.NewConverter(100)
 		msg = &sarama.ConsumerMessage{
 			Headers: []*sarama.RecordHeader{
 				{
@@ -327,6 +327,75 @@ var _ = Describe("Converter", func() {
 
 			It("parses JSON null correctly", func() {
 				Expect(record.Value).To(BeNil())
+			})
+		})
+
+		Context("with configurable preview length", func() {
+			Context("with preview length of 10", func() {
+				BeforeEach(func() {
+					converter = pkg.NewConverter(10)
+					msg.Value = make([]byte, 50)
+					for i := range msg.Value {
+						msg.Value[i] = 'x'
+					}
+				})
+
+				It("limits preview to 10 bytes", func() {
+					Expect(record).NotTo(BeNil())
+					errorMap, ok := record.Value.(map[string]interface{})
+					Expect(ok).To(BeTrue())
+					Expect(errorMap["valueLength"]).To(Equal(50))
+					Expect(errorMap["previewHex"]).To(HaveLen(20)) // 10 bytes = 20 hex chars
+				})
+			})
+
+			Context("with preview length of -1 (unlimited)", func() {
+				BeforeEach(func() {
+					converter = pkg.NewConverter(-1)
+					msg.Value = make([]byte, 200)
+					for i := range msg.Value {
+						msg.Value[i] = 'y'
+					}
+				})
+
+				It("includes full preview without truncation", func() {
+					Expect(record).NotTo(BeNil())
+					errorMap, ok := record.Value.(map[string]interface{})
+					Expect(ok).To(BeTrue())
+					Expect(errorMap["valueLength"]).To(Equal(200))
+					Expect(errorMap["previewHex"]).To(HaveLen(400)) // 200 bytes = 400 hex chars
+				})
+			})
+
+			Context("with preview length of 0", func() {
+				BeforeEach(func() {
+					converter = pkg.NewConverter(0)
+					msg.Value = []byte("test")
+				})
+
+				It("includes empty preview", func() {
+					Expect(record).NotTo(BeNil())
+					errorMap, ok := record.Value.(map[string]interface{})
+					Expect(ok).To(BeTrue())
+					Expect(errorMap["valueLength"]).To(Equal(4))
+					Expect(errorMap["previewHex"]).To(HaveLen(0))
+					Expect(errorMap["previewBase64"]).To(Equal(""))
+				})
+			})
+
+			Context("with preview length larger than value", func() {
+				BeforeEach(func() {
+					converter = pkg.NewConverter(1000)
+					msg.Value = []byte("short")
+				})
+
+				It("includes full value", func() {
+					Expect(record).NotTo(BeNil())
+					errorMap, ok := record.Value.(map[string]interface{})
+					Expect(ok).To(BeTrue())
+					Expect(errorMap["valueLength"]).To(Equal(5))
+					Expect(errorMap["previewHex"]).To(Equal("73686f7274"))
+				})
 			})
 		})
 	})

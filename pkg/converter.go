@@ -20,11 +20,14 @@ type Converter interface {
 	Convert(ctx context.Context, msg *sarama.ConsumerMessage) (*Record, error)
 }
 
-func NewConverter() Converter {
-	return &converter{}
+func NewConverter(errorPreviewContentLength int) Converter {
+	return &converter{
+		errorPreviewContentLength: errorPreviewContentLength,
+	}
 }
 
 type converter struct {
+	errorPreviewContentLength int
 }
 
 // Convert transforms a Sarama consumer message into a Record.
@@ -33,11 +36,11 @@ type converter struct {
 // an error map with the following structure:
 //   - error: string describing the JSON parsing error
 //   - valueLength: total size of the original message in bytes
-//   - previewBase64: base64-encoded preview of first 100 bytes
-//   - previewHex: hex-encoded preview of first 100 bytes
+//   - previewBase64: base64-encoded preview of message value
+//   - previewHex: hex-encoded preview of message value
 //
-// Both preview fields are limited to 100 bytes to prevent memory exhaustion
-// from large malformed messages.
+// The preview fields are limited by errorPreviewContentLength to prevent memory exhaustion
+// from large malformed messages. If errorPreviewContentLength is -1, no limit is applied.
 func (c *converter) Convert(ctx context.Context, msg *sarama.ConsumerMessage) (*Record, error) {
 	record := Record{
 		Key:       string(msg.Key),
@@ -49,7 +52,10 @@ func (c *converter) Convert(ctx context.Context, msg *sarama.ConsumerMessage) (*
 	if len(msg.Value) != 0 {
 		if err := json.Unmarshal(msg.Value, &record.Value); err != nil {
 			glog.V(4).Infof("unmarshal json failed: %v", err)
-			previewLength := min(100, len(msg.Value))
+			previewLength := len(msg.Value)
+			if c.errorPreviewContentLength >= 0 {
+				previewLength = min(c.errorPreviewContentLength, len(msg.Value))
+			}
 			record.Value = map[string]interface{}{
 				"error":         fmt.Sprintf("unmarshal value as JSON failed: %v", err),
 				"valueLength":   len(msg.Value),
