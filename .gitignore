@@ -1,4 +1,9 @@
-/vendor
-/CLAUDE.md
 /.claude
+/.cursorignore
+/.mcp-auth
+/.mcp.json
+/.serena
+/CLAUDE.md
 /coverage.out
+/data
+/vendor

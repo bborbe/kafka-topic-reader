@@ -97,30 +97,32 @@ func (c *changesProvider) Changes(
 				topic,
 				offset,
 				libkafka.MessageHanderList{
-					libkafka.MessageHandlerFunc(func(ctx context.Context, msg *sarama.ConsumerMessage) error {
-						// Apply filter if specified (before conversion for efficiency)
-						if !MatchesFilter(msg, filter) {
-							return nil // Skip this record, continue processing
-						}
-
-						record, err := c.converter.Convert(ctx, msg)
-						if err != nil {
-							return errors.Wrap(ctx, err, "convert msg to record failed")
-						}
-
-						select {
-						case <-ctx.Done():
-							return ctx.Err()
-						case ch <- *record:
-							counter++
-							if counter == limit {
-								trigger.Fire()
-								// wait until trigger ctx is canceld
-								<-ctx.Done()
+					libkafka.MessageHandlerFunc(
+						func(ctx context.Context, msg *sarama.ConsumerMessage) error {
+							// Apply filter if specified (before conversion for efficiency)
+							if !MatchesFilter(msg, filter) {
+								return nil // Skip this record, continue processing
 							}
-							return nil
-						}
-					}),
+
+							record, err := c.converter.Convert(ctx, msg)
+							if err != nil {
+								return errors.Wrap(ctx, err, "convert msg to record failed")
+							}
+
+							select {
+							case <-ctx.Done():
+								return ctx.Err()
+							case ch <- *record:
+								counter++
+								if counter == limit {
+									trigger.Fire()
+									// wait until trigger ctx is canceld
+									<-ctx.Done()
+								}
+								return nil
+							}
+						},
+					),
 					libkafka.NewOffsetTriggerMessageHandler(
 						map[libkafka.Partition]libkafka.Offset{partition: *highWaterMark},
 						topic,

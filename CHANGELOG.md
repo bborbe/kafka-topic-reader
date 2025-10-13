@@ -8,6 +8,18 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.4.0
+
+- add golangci-lint configuration with comprehensive linter settings
+- enhance Makefile with additional security checks (gosec, trivy, osv-scanner)
+- add code formatting tools (golines for line length enforcement, gofmt)
+- add license header automation to precommit workflow
+- update build tooling dependencies in tools.go
+- improve CI/CD workflow configuration
+- refactor code organization and update dependencies
+- disable race detection in tests for performance
+- enhance error handling and code quality checks
+
 ## v1.3.2
 
 - add input validation for filter parameter with maximum length check (1024 bytes)

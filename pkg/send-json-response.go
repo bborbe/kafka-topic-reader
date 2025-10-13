@@ -9,12 +9,12 @@ import (
 	"net/http"
 )
 
-const ContentTypeApplicationJson = "application/json"
+const ContentTypeApplicationJSON = "application/json"
 
 const ContentTypeField = "Content-Type"
 
 func SendJSONResponse(resp http.ResponseWriter, data interface{}, statusCode int) error {
-	resp.Header().Add(ContentTypeField, ContentTypeApplicationJson)
+	resp.Header().Add(ContentTypeField, ContentTypeApplicationJSON)
 	resp.WriteHeader(statusCode)
 	return json.NewEncoder(resp).Encode(data)
 }

@@ -1,10 +1,10 @@
-FROM golang:1.23.4 AS build
+FROM golang:1.25.2 AS build
 COPY . /workspace
 WORKDIR /workspace
 RUN CGO_ENABLED=0 GOOS=linux go build -mod=mod -ldflags "-s" -a -installsuffix cgo -o /main
 CMD ["/bin/bash"]
 
-FROM alpine:3.21 AS alpine
+FROM alpine:3.22 AS alpine
 RUN apk --no-cache add ca-certificates
 
 FROM scratch

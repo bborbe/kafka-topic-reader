@@ -318,7 +318,11 @@ var _ = Describe("Handler", func() {
 
 		Context("with filter parameter", func() {
 			BeforeEach(func() {
-				request = httptest.NewRequest("GET", "/read?topic=test-topic&partition=0&offset=0&filter=test-value", nil)
+				request = httptest.NewRequest(
+					"GET",
+					"/read?topic=test-topic&partition=0&offset=0&filter=test-value",
+					nil,
+				)
 				records := pkg.Records{
 					{Key: "key1", Value: "test-value here", Offset: libkafka.Offset(1)},
 				}
@@ -338,7 +342,11 @@ var _ = Describe("Handler", func() {
 
 		Context("with empty filter parameter", func() {
 			BeforeEach(func() {
-				request = httptest.NewRequest("GET", "/read?topic=test-topic&partition=0&offset=0&filter=", nil)
+				request = httptest.NewRequest(
+					"GET",
+					"/read?topic=test-topic&partition=0&offset=0&filter=",
+					nil,
+				)
 				records := pkg.Records{
 					{Key: "key1", Value: "any value", Offset: libkafka.Offset(1)},
 				}
@@ -359,12 +367,18 @@ var _ = Describe("Handler", func() {
 				for i := range longFilter {
 					longFilter[i] = 'a'
 				}
-				request = httptest.NewRequest("GET", "/read?topic=test-topic&partition=0&offset=0&filter="+string(longFilter), nil)
+				request = httptest.NewRequest(
+					"GET",
+					"/read?topic=test-topic&partition=0&offset=0&filter="+string(longFilter),
+					nil,
+				)
 			})
 
 			It("returns an error for filter exceeding maximum length", func() {
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("filter parameter exceeds maximum length of 1024 bytes"))
+				Expect(
+					err.Error(),
+				).To(ContainSubstring("filter parameter exceeds maximum length of 1024 bytes"))
 			})
 
 			It("does not call ChangesProvider", func() {

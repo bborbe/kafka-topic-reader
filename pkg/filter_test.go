@@ -77,51 +77,38 @@ var _ = Describe("MatchesFilter", func() {
 		})
 	})
 
-	Context("JSON binary value matching", func() {
-		BeforeEach(func() {
-			msg.Value = []byte(`{"user":"john.doe","message":"This is a test message","count":42}`)
-		})
-
-		Context("matching field name", func() {
-			BeforeEach(func() {
-				filter = []byte("user")
-			})
-
-			It("finds field names in JSON bytes", func() {
-				Expect(result).To(BeTrue())
-			})
-		})
-
-		Context("matching field value", func() {
-			BeforeEach(func() {
-				filter = []byte("john.doe")
-			})
-
-			It("finds field values in JSON bytes", func() {
-				Expect(result).To(BeTrue())
-			})
-		})
-
-		Context("matching partial field value", func() {
-			BeforeEach(func() {
-				filter = []byte("test message")
-			})
-
-			It("finds partial matches in JSON bytes", func() {
-				Expect(result).To(BeTrue())
-			})
-		})
-
-		Context("matching number as string", func() {
-			BeforeEach(func() {
-				filter = []byte("42")
-			})
-
-			It("finds numeric values in JSON bytes", func() {
-				Expect(result).To(BeTrue())
-			})
-		})
-	})
+	DescribeTable("JSON binary value matching",
+		func(msgValue []byte, filterValue []byte, expectedMatch bool) {
+			msg.Value = msgValue
+			filter = filterValue
+			result := pkg.MatchesFilter(msg, filter)
+			Expect(result).To(Equal(expectedMatch))
+		},
+		Entry(
+			"finds field names in JSON bytes",
+			[]byte(`{"user":"john.doe","message":"This is a test message","count":42}`),
+			[]byte("user"),
+			true,
+		),
+		Entry(
+			"finds field values in JSON bytes",
+			[]byte(`{"user":"john.doe","message":"This is a test message","count":42}`),
+			[]byte("john.doe"),
+			true,
+		),
+		Entry(
+			"finds partial matches in JSON bytes",
+			[]byte(`{"user":"john.doe","message":"This is a test message","count":42}`),
+			[]byte("test message"),
+			true,
+		),
+		Entry(
+			"finds numeric values in JSON bytes",
+			[]byte(`{"user":"john.doe","message":"This is a test message","count":42}`),
+			[]byte("42"),
+			true,
+		),
+	)
 
 	Context("with empty value", func() {
 		BeforeEach(func() {
@@ -145,8 +132,8 @@ var _ = Describe("MatchesFilter", func() {
 		})
 	})
 
-	Context("complex nested JSON structures", func() {
-		BeforeEach(func() {
+	DescribeTable("complex nested JSON structures",
+		func(filterValue []byte, expectedMatch bool) {
 			msg.Value = []byte(`{
 				"data": {
 					"nested": [
@@ -160,48 +147,15 @@ var _ = Describe("MatchesFilter", func() {
 					"tags": ["important", "filtered"]
 				}
 			}`)
-		})
-
-		Context("searching in nested objects", func() {
-			BeforeEach(func() {
-				filter = []byte("target_value")
-			})
-
-			It("finds values in nested JSON structures", func() {
-				Expect(result).To(BeTrue())
-			})
-		})
-
-		Context("searching in arrays", func() {
-			BeforeEach(func() {
-				filter = []byte("first item")
-			})
-
-			It("finds values in JSON arrays", func() {
-				Expect(result).To(BeTrue())
-			})
-		})
-
-		Context("searching for array values", func() {
-			BeforeEach(func() {
-				filter = []byte("important")
-			})
-
-			It("finds values in JSON string arrays", func() {
-				Expect(result).To(BeTrue())
-			})
-		})
-
-		Context("case sensitive search", func() {
-			BeforeEach(func() {
-				filter = []byte("FILTERED")
-			})
-
-			It("does not match different case in binary data", func() {
-				Expect(result).To(BeFalse())
-			})
-		})
-	})
+			filter = filterValue
+			result := pkg.MatchesFilter(msg, filter)
+			Expect(result).To(Equal(expectedMatch))
+		},
+		Entry("finds values in nested JSON structures", []byte("target_value"), true),
+		Entry("finds values in JSON arrays", []byte("first item"), true),
+		Entry("finds values in JSON string arrays", []byte("important"), true),
+		Entry("does not match different case in binary data", []byte("FILTERED"), false),
+	)
 
 	Context("binary data patterns", func() {
 		BeforeEach(func() {
