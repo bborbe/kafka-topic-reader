@@ -187,11 +187,18 @@ var _ = Describe("Converter", func() {
 				msg.Value = []byte("banana")
 			})
 
-			It("returns record with error message in value", func() {
+			It("returns record with structured error information", func() {
 				Expect(record).NotTo(BeNil())
-				Expect(
-					record.Value,
-				).To(Equal("unmarshal json failed: invalid character 'b' looking for beginning of value"))
+				errorMap, ok := record.Value.(map[string]interface{})
+				Expect(ok).To(BeTrue())
+				Expect(errorMap).To(HaveKey("error"))
+				Expect(errorMap["error"]).To(ContainSubstring("unmarshal value as JSON failed:"))
+				Expect(errorMap).To(HaveKey("valueLength"))
+				Expect(errorMap["valueLength"]).To(Equal(6))
+				Expect(errorMap).To(HaveKey("previewBase64"))
+				Expect(errorMap["previewBase64"]).To(Equal("YmFuYW5h"))
+				Expect(errorMap).To(HaveKey("previewHex"))
+				Expect(errorMap["previewHex"]).To(Equal("62616e616e61"))
 			})
 		})
 
@@ -200,9 +207,67 @@ var _ = Describe("Converter", func() {
 				msg.Value = []byte(`{"incomplete": `)
 			})
 
-			It("returns record with error message in value", func() {
+			It("returns record with structured error information", func() {
 				Expect(record).NotTo(BeNil())
-				Expect(record.Value).To(ContainSubstring("unmarshal json failed:"))
+				errorMap, ok := record.Value.(map[string]interface{})
+				Expect(ok).To(BeTrue())
+				Expect(errorMap).To(HaveKey("error"))
+				Expect(errorMap["error"]).To(ContainSubstring("unmarshal value as JSON failed:"))
+				Expect(errorMap).To(HaveKey("valueLength"))
+				Expect(errorMap["valueLength"]).To(Equal(15))
+				Expect(errorMap).To(HaveKey("previewBase64"))
+				Expect(errorMap["previewBase64"]).To(Equal("eyJpbmNvbXBsZXRlIjog"))
+				Expect(errorMap).To(HaveKey("previewHex"))
+				Expect(errorMap["previewHex"]).To(Equal("7b22696e636f6d706c657465223a20"))
+			})
+		})
+
+		Context("with exactly 100 bytes of unparseable data", func() {
+			BeforeEach(func() {
+				msg.Value = make([]byte, 100)
+				for i := range msg.Value {
+					msg.Value[i] = 'x'
+				}
+			})
+
+			It("includes full preview without truncation", func() {
+				Expect(record).NotTo(BeNil())
+				errorMap, ok := record.Value.(map[string]interface{})
+				Expect(ok).To(BeTrue())
+				Expect(errorMap["valueLength"]).To(Equal(100))
+				Expect(errorMap["previewHex"]).To(HaveLen(200))
+			})
+		})
+
+		Context("with more than 100 bytes of unparseable data", func() {
+			BeforeEach(func() {
+				msg.Value = make([]byte, 200)
+				for i := range msg.Value {
+					msg.Value[i] = 'y'
+				}
+			})
+
+			It("truncates preview to 100 bytes", func() {
+				Expect(record).NotTo(BeNil())
+				errorMap, ok := record.Value.(map[string]interface{})
+				Expect(ok).To(BeTrue())
+				Expect(errorMap["valueLength"]).To(Equal(200))
+				Expect(errorMap["previewHex"]).To(HaveLen(200))
+			})
+		})
+
+		Context("with binary non-UTF8 data", func() {
+			BeforeEach(func() {
+				msg.Value = []byte{0x00, 0xFF, 0xFE, 0xFD, 0xFC}
+			})
+
+			It("handles binary data safely", func() {
+				Expect(record).NotTo(BeNil())
+				errorMap, ok := record.Value.(map[string]interface{})
+				Expect(ok).To(BeTrue())
+				Expect(errorMap["valueLength"]).To(Equal(5))
+				Expect(errorMap["previewBase64"]).To(Equal("AP/+/fw="))
+				Expect(errorMap["previewHex"]).To(Equal("00fffefdfc"))
 			})
 		})
 

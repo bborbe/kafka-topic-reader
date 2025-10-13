@@ -8,6 +8,18 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.4.1
+
+- improve JSON unmarshal error messages with structured format
+- add security fix: limit error preview fields to 100 bytes to prevent DoS
+- change error format from string to map with error, valueLength, previewBase64, previewHex
+- add hex encoding for binary data preview (safe for non-UTF8 data)
+- add comprehensive edge case tests (100 bytes boundary, truncation, binary data)
+- add function documentation explaining error structure
+- migrate to libhttp.SendJSONResponse with context support
+- update dependencies (bborbe/http v1.16.0)
+- improve code formatting and organization
+
 ## v1.4.0
 
 - add golangci-lint configuration with comprehensive linter settings

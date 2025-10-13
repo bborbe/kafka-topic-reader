@@ -8,6 +8,8 @@ import (
 	libkafka "github.com/bborbe/kafka"
 )
 
+type Records []Record
+
 type Record struct {
 	Key       string             `json:"key"`
 	Value     interface{}        `json:"value"`
@@ -16,5 +18,3 @@ type Record struct {
 	Topic     libkafka.Topic     `json:"topic"`
 	Header    libkafka.Header    `json:"header"`
 }
-
-type Records []Record
