@@ -8,6 +8,19 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.0
+
+- enhance golangci-lint configuration with comprehensive linter settings (funlen, gocognit, nestif, maintidx)
+- add readability and style linters (gofmt, goimports, errname, unparam)
+- add safety linters (bodyclose, forcetypeassert, asasalint, prealloc)
+- refactor changes-provider.go to reduce cognitive complexity (32 → <20) with extracted helper methods
+- refactor handler.go to reduce cognitive complexity (22 → <20) with extracted functions
+- update containerd dependency to v1.7.29 (security fix for GHSA-m6hq-p25p-ffr2, GHSA-pwhc-rpq9-4c8w)
+- update opencontainers/selinux to v1.13.0 (security fix for GHSA-cgrx-mc8f-2prm)
+- improve code maintainability by extracting focused, single-responsibility functions
+- update CI/CD workflow configuration
+- update Dockerfile dependencies
+
 ## v1.5.0
 
 - add configurable error preview content length via ERROR_PREVIEW_CONTENT_LENGTH environment variable

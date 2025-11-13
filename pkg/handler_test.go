@@ -125,7 +125,7 @@ var _ = Describe("Handler", func() {
 				request = httptest.NewRequest("GET", "/read?"+values.Encode(), nil)
 
 				records = pkg.Records{
-					{
+					pkg.Record{
 						Key:       "test-key",
 						Value:     map[string]interface{}{"test": "value"},
 						Offset:    libkafka.Offset(0),
@@ -285,9 +285,9 @@ var _ = Describe("Handler", func() {
 					request = httptest.NewRequest("GET", "/read?"+values.Encode(), nil)
 
 					records := pkg.Records{
-						{Offset: libkafka.Offset(5)},
-						{Offset: libkafka.Offset(6)},
-						{Offset: libkafka.Offset(7)},
+						pkg.Record{Offset: libkafka.Offset(5)},
+						pkg.Record{Offset: libkafka.Offset(6)},
+						pkg.Record{Offset: libkafka.Offset(7)},
 					}
 					changesProvider.ChangesReturns(records, nil)
 				})
