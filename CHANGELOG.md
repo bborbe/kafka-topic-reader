@@ -8,6 +8,13 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.1
+
+- add .PHONY declarations to all Makefile targets
+- add go-modtool for go.mod formatting in format target
+- add mocks directory creation in generate target
+- update dependencies to latest versions
+
 ## v1.6.0
 
 - enhance golangci-lint configuration with comprehensive linter settings (funlen, gocognit, nestif, maintidx)
