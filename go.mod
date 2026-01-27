@@ -83,12 +83,12 @@ require (
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/bborbe/argument/v2 v2.12.1 // indirect
+	github.com/bborbe/argument/v2 v2.12.3 // indirect
 	github.com/bborbe/collection v1.20.1 // indirect
-	github.com/bborbe/kv v1.18.0 // indirect
-	github.com/bborbe/math v1.3.0 // indirect
-	github.com/bborbe/parse v1.10.0 // indirect
-	github.com/bborbe/validation v1.4.0 // indirect
+	github.com/bborbe/kv v1.18.1 // indirect
+	github.com/bborbe/math v1.3.1 // indirect
+	github.com/bborbe/parse v1.10.1 // indirect
+	github.com/bborbe/validation v1.4.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bkielbasa/cyclop v1.2.3 // indirect
 	github.com/blizzy78/varnamelen v0.8.0 // indirect

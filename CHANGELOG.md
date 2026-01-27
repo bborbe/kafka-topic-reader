@@ -8,6 +8,14 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.5
+
+- update bborbe/argument to v2.12.3
+- update bborbe/kv to v1.18.1
+- update bborbe/math to v1.3.1
+- update bborbe/parse to v1.10.1
+- update bborbe/validation to v1.4.1
+
 ## v1.6.4
 
 - improve Docker build with BuildKit and build args for git version, commit, and date
