@@ -15,6 +15,7 @@ require (
 	github.com/bborbe/run v1.9.1
 	github.com/bborbe/sentry v1.9.2
 	github.com/bborbe/service v1.9.1
+	github.com/bborbe/time v1.21.1
 	github.com/golang/glog v1.2.5
 	github.com/golangci/golangci-lint v1.64.8
 	github.com/google/addlicense v1.2.0
@@ -83,11 +84,10 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/bborbe/argument/v2 v2.12.1 // indirect
-	github.com/bborbe/collection v1.20.0 // indirect
+	github.com/bborbe/collection v1.20.1 // indirect
 	github.com/bborbe/kv v1.18.0 // indirect
 	github.com/bborbe/math v1.3.0 // indirect
 	github.com/bborbe/parse v1.10.0 // indirect
-	github.com/bborbe/time v1.21.0 // indirect
 	github.com/bborbe/validation v1.4.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bkielbasa/cyclop v1.2.3 // indirect
@@ -189,7 +189,7 @@ require (
 	github.com/gofrs/flock v0.12.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
-	github.com/golang/snappy v1.0.0 // indirect
+	github.com/golang/snappy v0.0.4 // indirect
 	github.com/golangci/dupl v0.0.0-20250308024227-f665c8d69b32 // indirect
 	github.com/golangci/go-printf-func-name v0.1.0 // indirect
 	github.com/golangci/gofmt v0.0.0-20250106114630-d62b90e6713d // indirect

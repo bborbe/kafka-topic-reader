@@ -8,6 +8,12 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.3
+
+- refactor build metrics from global state to dependency injection
+- add configurable Prometheus namespace via PROMETHEUS_NAMESPACE
+- move build-info-metrics.go from metrics package to pkg package
+
 ## v1.6.2
 
 - update golang to 1.25.6

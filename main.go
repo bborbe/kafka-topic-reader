@@ -16,10 +16,13 @@ import (
 	"github.com/bborbe/run"
 	"github.com/bborbe/sentry"
 	"github.com/bborbe/service"
+	libtime "github.com/bborbe/time"
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
+	"github.com/bborbe/kafka-topic-reader/pkg"
 	"github.com/bborbe/kafka-topic-reader/pkg/factory"
 )
 
@@ -34,15 +37,20 @@ type application struct {
 	Listen                    string            `required:"true"  arg:"listen"                       env:"LISTEN"                       usage:"address to listen to"`
 	KafkaBrokers              string            `required:"true"  arg:"kafka-brokers"                env:"KAFKA_BROKERS"                usage:"Comma separated list of Kafka brokers"`
 	ErrorPreviewContentLength int               `required:"false" arg:"error-preview-content-length" env:"ERROR_PREVIEW_CONTENT_LENGTH" usage:"Maximum length in bytes for error message preview. Use -1 for unlimited"                  default:"100"`
-	BuildGitCommit            string            `required:"false" arg:"build-git-commit" env:"BUILD_GIT_COMMIT" usage:"Build Git commit hash"                                  default:"none"`
-	BuildDate                 *libtime.DateTime `required:"false" arg:"build-date"       env:"BUILD_DATE"       usage:"Build timestamp (RFC3339)"`
+	PrometheusNamespace       string            `required:"false" arg:"prometheus-namespace"         env:"PROMETHEUS_NAMESPACE"         usage:"Namespace used for prometheus"                                                            default:"default"`
+	BuildGitCommit            string            `required:"false" arg:"build-git-commit"             env:"BUILD_GIT_COMMIT"             usage:"Build Git commit hash"                                                                    default:"none"`
+	BuildDate                 *libtime.DateTime `required:"false" arg:"build-date"                   env:"BUILD_DATE"                   usage:"Build timestamp (RFC3339)"`
 }
 
 func (a *application) Run(
 	ctx context.Context,
 	sentryClient sentry.Client,
 ) error {
-	libmetrics.NewBuildInfoMetrics().SetBuildInfo(a.BuildDate)
+	buildInfoMetrics := pkg.NewBuildInfoMetrics(
+		prometheus.DefaultRegisterer,
+		a.PrometheusNamespace,
+	)
+	buildInfoMetrics.SetBuildInfo(a.BuildDate)
 
 	saramaClient, err := libkafka.CreateSaramaClient(
 		ctx,
