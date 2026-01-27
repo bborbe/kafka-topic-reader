@@ -7,3 +7,5 @@
 /coverage.out
 /data
 /vendor
+/.update-logs/
+/.mcp-*

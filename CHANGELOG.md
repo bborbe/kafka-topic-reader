@@ -8,6 +8,14 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.2
+
+- update golang to 1.25.6
+- update alpine to 3.23
+- update bborbe/* dependencies to latest
+- update IBM/sarama to v1.46.3
+- update getsentry/sentry-go to v0.40.0
+
 ## v1.6.1
 
 - add .PHONY declarations to all Makefile targets
