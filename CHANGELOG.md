@@ -8,6 +8,15 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.4
+
+- improve Docker build with BuildKit and build args for git version, commit, and date
+- add BUILD_GIT_COMMIT and BUILD_DATE environment variables to Dockerfile
+- refactor Makefile to use VERSION from git tags
+- add check-go-mod target to automate vendor updates
+- improve Docker cleanup with builder prune and max-used-space limit
+- rename REGISTRY to DOCKER_REGISTRY for clarity
+
 ## v1.6.3
 
 - refactor build metrics from global state to dependency injection
