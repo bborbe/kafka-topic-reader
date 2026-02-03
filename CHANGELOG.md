@@ -8,6 +8,13 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.6
+
+- Update github.com/bborbe/sentry v1.9.2 → v1.9.4
+- Update github.com/onsi/ginkgo/v2 v2.27.5 → v2.28.1
+- Update github.com/onsi/gomega v1.39.0 → v1.39.1
+- Update golang.org/x dependencies (mod, net, tools, telemetry)
+
 ## v1.6.5
 
 - update bborbe/argument to v2.12.3
