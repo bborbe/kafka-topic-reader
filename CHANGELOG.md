@@ -8,6 +8,13 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.8
+
+- Update github.com/bborbe/errors v1.5.1 → v1.5.2
+- Update github.com/bborbe/log v1.6.1 → v1.6.2
+- Update github.com/bborbe/sentry v1.9.4 → v1.9.6
+- Update github.com/bborbe/time v1.21.1 → v1.22.0
+
 ## v1.6.7
 
 - Update GitHub workflows to v1 plugin system

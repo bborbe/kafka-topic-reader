@@ -8,14 +8,14 @@ replace (
 
 require (
 	github.com/IBM/sarama v1.46.3
-	github.com/bborbe/errors v1.5.1
+	github.com/bborbe/errors v1.5.2
 	github.com/bborbe/http v1.26.1
 	github.com/bborbe/kafka v1.22.1
-	github.com/bborbe/log v1.6.1
+	github.com/bborbe/log v1.6.2
 	github.com/bborbe/run v1.9.1
-	github.com/bborbe/sentry v1.9.4
+	github.com/bborbe/sentry v1.9.6
 	github.com/bborbe/service v1.9.1
-	github.com/bborbe/time v1.21.1
+	github.com/bborbe/time v1.22.0
 	github.com/golang/glog v1.2.5
 	github.com/golangci/golangci-lint v1.64.8
 	github.com/google/addlicense v1.2.0
