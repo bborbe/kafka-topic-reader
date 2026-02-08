@@ -8,6 +8,12 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.7
+
+- Update GitHub workflows to v1 plugin system
+- Simplify Claude Code action with inline conditions
+- Add ready_for_review and reopened triggers
+
 ## v1.6.6
 
 - Update github.com/bborbe/sentry v1.9.2 → v1.9.4
