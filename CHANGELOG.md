@@ -8,6 +8,14 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.11
+
+- Update bborbe/errors to v1.5.4
+- Update bborbe/run to v1.9.5
+- Update bborbe/time to v1.25.0
+- Update docker/cli to v29.3.0 and go.yaml.in/yaml/v3 to v3.0.4
+- Remove replace/exclude directives from go.mod
+
 ## v1.6.10
 
 - go mod update
