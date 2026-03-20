@@ -15,7 +15,7 @@ precommit: ensure format generate test check addlicense
 
 .PHONY: ensure
 ensure:
-	go mod tidy
+	go mod tidy -e
 	go mod verify
 	rm -rf vendor
 
@@ -43,7 +43,7 @@ check: lint vet errcheck vulncheck osv-scanner gosec trivy
 
 .PHONY: lint
 lint:
-	go run -mod=mod github.com/golangci/golangci-lint/cmd/golangci-lint run --config .golangci.yml ./...
+	go run -mod=mod github.com/golangci/golangci-lint/v2/cmd/golangci-lint run --config .golangci.yml ./...
 
 .PHONY: vet
 vet:
@@ -73,7 +73,13 @@ gosec:
 
 .PHONY: trivy
 trivy:
-	trivy fs --scanners vuln,secret --quiet --no-progress --disable-telemetry --exit-code 1 .
+	trivy fs \
+	--db-repository ghcr.io/aquasecurity/trivy-db \
+	--scanners vuln,secret \
+	--quiet \
+	--no-progress \
+	--disable-telemetry \
+	--exit-code 1 .
 
 .PHONY: addlicense
 addlicense:

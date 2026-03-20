@@ -23,7 +23,7 @@ var _ = Describe("Factory", func() {
 		It("implements http.Handler interface", func() {
 			handler := factory.CreateReadHandler(nil, nil, 100)
 			// Verify it implements http.Handler by using it as one
-			var _ http.Handler = handler
+			var _ http.Handler = handler //nolint:staticcheck
 			Expect(handler).NotTo(BeNil())
 		})
 
