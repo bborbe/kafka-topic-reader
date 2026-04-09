@@ -8,6 +8,13 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.16
+
+- Update Go from 1.26.1 to 1.26.2
+- Update bborbe/* dependencies (errors, http, kafka, log, run, sentry, service, time)
+- Update third-party deps (klauspost/compress, moby/buildkit, golang.org/x/sys, docker/cli)
+- Add CVE ignores for bbolt, bleve, pgx, aws-sdk-go-v2
+
 ## v1.6.15
 
 - Update go-git/go-git to v5.17.1 (fix security vulnerabilities)
