@@ -38,6 +38,7 @@ type application struct {
 	KafkaBrokers              string            `required:"true"  arg:"kafka-brokers"                env:"KAFKA_BROKERS"                usage:"Comma separated list of Kafka brokers"`
 	ErrorPreviewContentLength int               `required:"false" arg:"error-preview-content-length" env:"ERROR_PREVIEW_CONTENT_LENGTH" usage:"Maximum length in bytes for error message preview. Use -1 for unlimited"                  default:"100"`
 	PrometheusNamespace       string            `required:"false" arg:"prometheus-namespace"         env:"PROMETHEUS_NAMESPACE"         usage:"Namespace used for prometheus"                                                            default:"default"`
+	BuildGitVersion           string            `required:"false" arg:"build-git-version"            env:"BUILD_GIT_VERSION"            usage:"Build Git version"                                                                        default:"dev"`
 	BuildGitCommit            string            `required:"false" arg:"build-git-commit"             env:"BUILD_GIT_COMMIT"             usage:"Build Git commit hash"                                                                    default:"none"`
 	BuildDate                 *libtime.DateTime `required:"false" arg:"build-date"                   env:"BUILD_DATE"                   usage:"Build timestamp (RFC3339)"`
 }
