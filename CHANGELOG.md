@@ -8,6 +8,12 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.17
+
+- Update bborbe/* dependencies (errors, http, kafka, log, run, sentry, service, time)
+- Update golang.org/x/* packages (crypto, mod, net, tools, text, vuln)
+- Update getsentry/sentry-go to v0.45.0 and go-git to v5.18.0
+
 ## v1.6.16
 
 - Update Go from 1.26.1 to 1.26.2
