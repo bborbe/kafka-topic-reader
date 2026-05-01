@@ -1,11 +1,12 @@
 ---
-status: committing
+status: completed
 summary: Migrated kafka-topic-reader from tools.go to tools.env + Makefile @version pattern; go.mod reduced from 467 to 65 lines, all CVE suppressions cleaned up, make precommit exits 0, tagged v1.6.18.
 container: kafka-topic-reader-003-migrate-tools-go
 dark-factory-version: dev
 created: "2026-05-01T07:24:19Z"
 queued: "2026-05-01T07:24:19Z"
 started: "2026-05-01T07:24:21Z"
+completed: "2026-05-01T07:31:27Z"
 ---
 
 # Migrate from tools.go to tools.env + Makefile @version pattern
