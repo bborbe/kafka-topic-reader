@@ -8,7 +8,7 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
-## Unreleased
+## v1.6.19
 
 - chore: Migrate to tools.env + Makefile @version pattern; remove tools.go and obsolete replace block. go.mod reduced from 467 to 65 lines.
 - chore: Bump bborbe/* direct deps to latest (errors v1.5.12, http v1.26.11, kafka v1.22.12, log v1.6.12, run v1.9.23, sentry v1.9.16, service v1.9.10, time v1.25.10)
