@@ -1,17 +1,17 @@
 module github.com/bborbe/kafka-topic-reader
 
-go 1.26.2
+go 1.26.3
 
 require (
-	github.com/IBM/sarama v1.47.0
-	github.com/bborbe/errors v1.5.12
+	github.com/IBM/sarama v1.48.0
+	github.com/bborbe/errors v1.5.13
 	github.com/bborbe/http v1.26.11
 	github.com/bborbe/kafka v1.22.12
-	github.com/bborbe/log v1.6.12
-	github.com/bborbe/run v1.9.23
-	github.com/bborbe/sentry v1.9.16
-	github.com/bborbe/service v1.9.10
-	github.com/bborbe/time v1.25.10
+	github.com/bborbe/log v1.6.13
+	github.com/bborbe/run v1.9.24
+	github.com/bborbe/sentry v1.9.17
+	github.com/bborbe/service v1.9.11
+	github.com/bborbe/time v1.25.11
 	github.com/golang/glog v1.2.5
 	github.com/gorilla/mux v1.8.1
 	github.com/onsi/ginkgo/v2 v2.28.3
@@ -22,7 +22,7 @@ require (
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/bborbe/argument/v2 v2.12.21 // indirect
-	github.com/bborbe/collection v1.20.11 // indirect
+	github.com/bborbe/collection v1.20.12 // indirect
 	github.com/bborbe/kv v1.19.6 // indirect
 	github.com/bborbe/math v1.3.9 // indirect
 	github.com/bborbe/parse v1.10.11 // indirect
@@ -32,7 +32,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/eapache/go-resiliency v1.7.0 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/getsentry/sentry-go v0.46.1 // indirect
+	github.com/getsentry/sentry-go v0.46.2 // indirect
 	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
