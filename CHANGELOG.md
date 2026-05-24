@@ -8,6 +8,13 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.21
+
+- Update dependencies (IBM/sarama v1.49.0, bborbe/service v1.10.0, bborbe/time v1.27.0)
+- Update golang.org/x/crypto, x/net, x/sys, x/text to latest
+- Improve vulncheck with configurable ignore list (VULNCHECK_IGNORE)
+- Add fix target for bulk dependency updates
+
 ## v1.6.20
 
 - Bump Go toolchain to 1.26.3
