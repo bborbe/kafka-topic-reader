@@ -8,6 +8,14 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.22
+
+- bump Go 1.26.3 → 1.26.4 in Dockerfile and go.mod
+- update IBM/sarama v1.49.0 → v1.50.1 and all bborbe/* deps
+- drop standalone errcheck/gosec targets; move config into .golangci.yml
+- add .maintainer.yaml for autoRelease + autoApprove
+- add cloud.google.com/go v0.26.0 exclude to go.mod
+
 ## v1.6.21
 
 - Update dependencies (IBM/sarama v1.49.0, bborbe/service v1.10.0, bborbe/time v1.27.0)
