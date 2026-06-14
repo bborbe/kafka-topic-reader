@@ -4,7 +4,7 @@ WORKDIR /workspace
 RUN CGO_ENABLED=0 GOOS=linux go build -mod=mod -ldflags "-s" -a -installsuffix cgo -o /main
 CMD ["/bin/bash"]
 
-FROM alpine:3.23 AS alpine
+FROM alpine:3.24 AS alpine
 RUN apk --no-cache add ca-certificates
 
 FROM scratch

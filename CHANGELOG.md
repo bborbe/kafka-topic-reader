@@ -8,6 +8,14 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.23
+
+- bump alpine 3.23 → 3.24
+- bump IBM/sarama v1.50.1 → v1.50.2
+- bump bborbe/kafka v1.23.1 → v1.23.2
+- bump ginkgo/v2 v2.29.0 → v2.31.0, gomega v1.41.0 → v1.42.0
+- bump pierrec/lz4/v4 v4.1.26 → v4.1.27, drop go-errors/errors
+
 ## v1.6.22
 
 - bump Go 1.26.3 → 1.26.4 in Dockerfile and go.mod
