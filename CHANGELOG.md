@@ -8,6 +8,13 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.24
+
+- bump github.com/IBM/sarama v1.50.2 → v1.50.3
+- bump github.com/bborbe/kafka v1.23.2 → v1.25.0
+- bump golang.org/x/* packages
+- bump ginkgo/gomega and sentry-go
+
 ## v1.6.23
 
 - bump alpine 3.23 → 3.24
