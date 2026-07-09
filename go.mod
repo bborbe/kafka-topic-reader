@@ -1,17 +1,17 @@
 module github.com/bborbe/kafka-topic-reader
 
-go 1.26.4
+go 1.26.5
 
 require (
 	github.com/IBM/sarama v1.50.3
-	github.com/bborbe/errors v1.5.13
-	github.com/bborbe/http v1.26.13
-	github.com/bborbe/kafka v1.25.0
-	github.com/bborbe/log v1.6.14
-	github.com/bborbe/run v1.9.28
-	github.com/bborbe/sentry v1.9.18
-	github.com/bborbe/service v1.10.1
-	github.com/bborbe/time v1.27.1
+	github.com/bborbe/errors v1.5.16
+	github.com/bborbe/http v1.26.17
+	github.com/bborbe/kafka v1.25.3
+	github.com/bborbe/log v1.6.18
+	github.com/bborbe/run v1.9.31
+	github.com/bborbe/sentry v1.9.23
+	github.com/bborbe/service v1.10.5
+	github.com/bborbe/time v1.27.6
 	github.com/golang/glog v1.2.5
 	github.com/gorilla/mux v1.8.1
 	github.com/onsi/ginkgo/v2 v2.32.0
@@ -21,12 +21,12 @@ require (
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0 // indirect
-	github.com/bborbe/argument/v2 v2.12.27 // indirect
-	github.com/bborbe/collection v1.20.13 // indirect
-	github.com/bborbe/kv v1.21.2 // indirect
-	github.com/bborbe/math v1.3.11 // indirect
-	github.com/bborbe/parse v1.10.13 // indirect
-	github.com/bborbe/validation v1.4.14 // indirect
+	github.com/bborbe/argument/v2 v2.12.32 // indirect
+	github.com/bborbe/collection v1.20.17 // indirect
+	github.com/bborbe/kv v1.21.5 // indirect
+	github.com/bborbe/math v1.3.15 // indirect
+	github.com/bborbe/parse v1.10.17 // indirect
+	github.com/bborbe/validation v1.4.16 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -48,7 +48,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.69.0 // indirect
-	github.com/prometheus/procfs v0.20.1 // indirect
+	github.com/prometheus/procfs v0.21.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.53.0 // indirect
@@ -57,7 +57,7 @@ require (
 	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
-	golang.org/x/tools v0.46.0 // indirect
+	golang.org/x/tools v0.47.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
 

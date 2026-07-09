@@ -8,6 +8,12 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.6.25
+
+- bump bborbe deps (errors, http, kafka, log, run, sentry, service, time, etc.)
+- bump go toolchain to 1.26.5 (CI + Dockerfile)
+- exclude no-fix advisory GO-2026-5932 (x/crypto/openpgp unmaintained)
+
 ## v1.6.24
 
 - bump github.com/IBM/sarama v1.50.2 → v1.50.3
