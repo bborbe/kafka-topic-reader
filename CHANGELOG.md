@@ -15,8 +15,9 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 
 ## v1.6.27
 
-- update Go to 1.26.5 and update dependencies
+- update Go to 1.26.6 and update dependencies
 - fix GO-2026-5841 (klauspost/compress OOB read)
+- fix GO-2026-6179, GO-2026-6180, CVE-2026-56864, CVE-2026-56865 (golang.org/x/mod)
 
 ## v1.6.26
 
