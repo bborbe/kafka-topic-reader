@@ -8,6 +8,10 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## Unreleased
+
+- chore: update github.com/bborbe/run to v1.11.5
+
 ## v1.6.38
 
 - chore: update github.com/bborbe/errors to v1.6.5, github.com/bborbe/kafka to v1.29.1, github.com/bborbe/run to v1.11.4
