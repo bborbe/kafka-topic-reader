@@ -160,6 +160,25 @@ make upload        # Push Docker image to registry
 make clean         # Remove Docker image
 ```
 
+`make build` runs on the local Docker daemon by default. Set `BUILD_TARGET` to a
+kubectl context to build in a cluster instead, so the build does not need a local
+daemon:
+
+```bash
+make build BUILD_TARGET=nukedev     # build as a Kubernetes Job and push from there
+make build BUILD_TARGET=sun         # aliases: sun, nukedev, nukeprod
+```
+
+The aliases resolve to their own kubeconfig files; any other value is used as a
+plain kubectl context. A remote build pushes the image itself, so `upload` and
+`clean` become no-ops. The Job mounts the push credential from a
+`kubernetes.io/dockerconfigjson` secret, which `hack/build-cluster-bootstrap.sh`
+provisions into the `build` namespace once per cluster:
+
+```bash
+hack/build-cluster-bootstrap.sh nukedev
+```
+
 ## Architecture
 
 The service is built using:
