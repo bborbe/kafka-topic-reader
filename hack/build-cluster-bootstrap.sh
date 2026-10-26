@@ -27,17 +27,45 @@ die() {
 [ -n "${BUILD_TARGET}" ] || die "usage: $(basename "${BASH_SOURCE[0]}") <sun|nukedev|nukeprod|kubectl-context>"
 [ -f "${TEMPLATE}" ] || die "template not found: ${TEMPLATE}"
 
-# The same -teamvault-config value `make apply` takes (Makefile.k8s). Defaults to
-# the config the repo's own .envrc uses, so an operator who has teamvault-cli set
-# up does not have to export anything.
-TEAMVAULT="${TEAMVAULT:-${HOME}/.config/teamvault-cli/config.json}"
-[ -f "${TEAMVAULT}" ] || die "teamvault config not found: ${TEAMVAULT} (set TEAMVAULT to override)"
+# teamvault-cli's own config. The name is deliberately distinct from TEAMVAULT,
+# which this repo no longer uses at all: it used to select
+# teamvault-config-parser's file (~/.teamvault.json) for `make apply`, and a
+# TEAMVAULT surviving in an operator's environment would otherwise point this
+# script at that other tool's config. Resolution follows the order teamvault-cli
+# documents — $TEAMVAULT_CONFIG, then ~/.config/teamvault-cli/config.json, then
+# ~/.teamvault.json — so an operator who configured the CLI that way is not told
+# its config is missing.
+if [ -z "${TEAMVAULT_CLI_CONFIG:-}" ]; then
+	for candidate in "${TEAMVAULT_CONFIG:-}" \
+		"${HOME}/.config/teamvault-cli/config.json" \
+		"${HOME}/.teamvault.json"; do
+		[ -n "${candidate}" ] || continue
+		if [ -f "${candidate}" ]; then
+			TEAMVAULT_CLI_CONFIG="${candidate}"
+			break
+		fi
+	done
+fi
+[ -n "${TEAMVAULT_CLI_CONFIG:-}" ] ||
+	die "no teamvault-cli config found (set TEAMVAULT_CLI_CONFIG, or TEAMVAULT_CONFIG as the CLI reads it)"
+# An explicit override short-circuits the loop above, so the resolved path is tested
+# here. The hand-typed value is exactly the case a human gets wrong, and it deserves
+# the named diagnostic rather than whatever teamvault-cli prints.
+[ -f "${TEAMVAULT_CLI_CONFIG}" ] ||
+	die "teamvault-cli config not found: ${TEAMVAULT_CLI_CONFIG}"
 command -v teamvault-cli >/dev/null 2>&1 ||
 	die "teamvault-cli not found on PATH; it resolves the lookup key in ${TEMPLATE}"
 
 # Shared with hack/build-cluster.sh so the alias mapping cannot drift between
 # provisioning and building.
 source "${SCRIPT_DIR}/cluster-alias.sh"
+
+# The same check hack/build-cluster.sh makes. Without it, a resolved alias whose
+# kubeconfig file is absent surfaces as an opaque `context "default" does not
+# exist` from the first kubectl call instead of naming the missing file.
+if [ -n "${KUBECONFIG_PATH}" ] && [ ! -f "${KUBECONFIG_PATH}" ]; then
+	die "BUILD_TARGET '${BUILD_TARGET}' needs the kubeconfig ${KUBECONFIG_PATH}, which does not exist"
+fi
 
 # The rendered credential lives in a 600 temp file for the length of one
 # `create secret --dry-run` and is removed on every exit path. It is never
@@ -51,26 +79,35 @@ echo "build-cluster-bootstrap: cluster ${BUILD_TARGET} (kubectl context ${KUBE_C
 kc create namespace "${NAMESPACE}" --dry-run=client -o yaml | kc apply -f -
 echo "build-cluster-bootstrap: namespace ${NAMESPACE} present"
 
-# The lookup key comes from the template, so the template stays the single
-# declaration of which TeamVault item this secret is for. The registry host is
-# not read from it — docker.io's canonical auths key is hardcoded below — so a
-# template repointed at another registry would disagree with this secret.
+# Both the TeamVault item and the registry host come from the template, so the two
+# cannot disagree: a template repointed at another registry renders the credential
+# under that registry's auths key. This does not tie the secret to the registry the
+# Job actually pushes to (DOCKER_REGISTRY) — keep those in step when either changes.
 TEAMVAULT_KEY="$(sed -nE 's/.*"([A-Za-z0-9]{6,12})" \| teamvaultUser.*/\1/p' "${TEMPLATE}" | head -1)"
 [ -n "${TEAMVAULT_KEY}" ] || die "no teamvaultUser lookup key found in ${TEMPLATE}"
+# `|| true` is load-bearing: grep exits 1 when nothing matches, pipefail propagates
+# that through `head`, and `set -e` would kill the script at this assignment — before
+# the guard below could name the problem. A bare-host auths key (registry.example.com
+# rather than an https:// URL) is valid dockerconfigjson, so the no-match path is real.
+AUTHS_KEY="$(grep -oE 'https?://[^"]+' "${TEMPLATE}" | head -1 || true)"
+[ -n "${AUTHS_KEY}" ] || die "no https://-prefixed auths key found in ${TEMPLATE} (a bare host is valid dockerconfigjson, but this extraction cannot read it)"
 
 # teamvault-cli, not teamvault-config-parser: the parser takes its password from
 # the config file, which holds only url and user, so it authenticates unprivileged
 # and gets 403 on this item. The CLI reads the login from the macOS Keychain.
-TV_USER="$(teamvault-cli username --teamvault-config "${TEAMVAULT}" --teamvault-key="${TEAMVAULT_KEY}")"
-TV_PASS="$(teamvault-cli password --teamvault-config "${TEAMVAULT}" --teamvault-key="${TEAMVAULT_KEY}")"
+TV_USER="$(teamvault-cli username --teamvault-config "${TEAMVAULT_CLI_CONFIG}" --teamvault-key="${TEAMVAULT_KEY}")"
+TV_PASS="$(teamvault-cli password --teamvault-config "${TEAMVAULT_CLI_CONFIG}" --teamvault-key="${TEAMVAULT_KEY}")"
 [ -n "${TV_USER}" ] && [ -n "${TV_PASS}" ] || die "teamvault returned an empty credential for key ${TEAMVAULT_KEY}"
 
-# docker.io's canonical auths key, per the template. jq encodes the values, so a
-# credential containing a quote or a backslash cannot produce malformed JSON or
-# inject a second auths entry — printf '%s' would do both.
+# jq encodes the values, so a credential containing a quote or a backslash cannot
+# produce malformed JSON or inject a second auths entry — printf '%s' would do both.
+# The credential reaches jq through the environment, never argv: `ps` shows a
+# process's arguments to every local user, and the temp file's promise above covers
+# echoing and logging but not that third channel. Reading them back needs jq >= 1.6,
+# which provides env/0; older builds fail with jq's own `env/0 is not defined`.
 command -v jq >/dev/null 2>&1 || die "jq not found on PATH; it JSON-encodes the credential"
-jq -n --arg user "${TV_USER}" --arg pass "${TV_PASS}" \
-	'{auths:{"https://index.docker.io/v1/":{username:$user,password:$pass}}}' >"${RENDERED}"
+TV_USER="${TV_USER}" TV_PASS="${TV_PASS}" jq -n --arg key "${AUTHS_KEY}" \
+	'{auths:{($key):{username:env.TV_USER,password:env.TV_PASS}}}' >"${RENDERED}"
 unset TV_USER TV_PASS
 [ -s "${RENDERED}" ] || die "failed to render ${TEMPLATE}"
 
