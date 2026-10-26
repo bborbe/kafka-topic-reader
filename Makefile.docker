@@ -92,13 +92,13 @@ endif
 .PHONY: upload
 upload:
 ifeq ($(BUILD_TARGET),local)
-	docker push $(DOCKER_REGISTRY)/$(IMAGE):$(BUILD_TAG)
+	docker push "$(DOCKER_REGISTRY)/$(IMAGE):$(BUILD_TAG)"
 endif
 
 .PHONY: clean
 clean:
 ifeq ($(BUILD_TARGET),local)
-	docker rmi $(DOCKER_REGISTRY)/$(IMAGE):$(BUILD_TAG) || true
+	docker rmi "$(DOCKER_REGISTRY)/$(IMAGE):$(BUILD_TAG)" || true
 	docker builder prune --max-used-space 21474836480 -f || true
 	rm -rf vendor
 endif
