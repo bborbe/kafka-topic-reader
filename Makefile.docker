@@ -18,10 +18,10 @@ BUILD_PUSH_SECRET ?= buildkit-push
 BUILD_REF ?= $(shell git symbolic-ref -q --short HEAD || git rev-parse HEAD)
 
 # The image tag. $(VERSION) is this repo's own convention — check-version-tag
-# enforces that a vX.Y.Z image is built from the vX.Y.Z tag — so the remote arm
-# keeps it. A scratch verification passes VERSION=<scratch> together with
-# ALLOW_UNTAGGED_BUILD=1; check-version-tag is skipped on the remote arm anyway,
-# because the Job clones a ref rather than checking out a tag.
+# enforces that a vX.Y.Z image is built from the vX.Y.Z tag — and the remote arm
+# keeps it, because the tag is what a release deploys. A scratch verification passes
+# VERSION=<scratch> together with ALLOW_UNTAGGED_BUILD=1, which is the only way past
+# the guard on either arm.
 BUILD_TAG ?= $(VERSION)
 
 # check-version-tag runs on BOTH arms. It is the only thing stopping a remote build
@@ -44,8 +44,15 @@ endif
 # have run. Any shell-active character in any of them refuses the whole invocation.
 BUILD_VALUES = $(BUILD_TARGET)$(BUILD_NAMESPACE)$(BUILD_REPO_URL)$(BUILD_REF)$(BUILD_TAG)$(BRANCH)$(BUILD_DOCKERFILE)$(DOCKER_REGISTRY)$(IMAGE)$(BUILD_PUSH_SECRET)$(BUILD_TIMEOUT)
 SHELL_ACTIVE := ' " $$ ` \ ( ) ; & | < > ! *
+# Scoped to the goals that render these values. BUILD_REF and BRANCH default to the
+# current branch name, and an ordinary refname may legally contain '(' or '!', so an
+# unscoped check would abort `make test` on a branch called feat/a(b). Evaluating at
+# parse time still puts it ahead of every prerequisite, which a recipe-line guard does
+# not — check-version-tag renders the same values and would already have run.
+ifneq ($(filter build upload clean buca,$(MAKECMDGOALS)),)
 ifneq ($(strip $(foreach c,$(SHELL_ACTIVE),$(findstring $(c),$(BUILD_VALUES)))),)
 $(error a build value contains a shell metacharacter; refusing to build)
+endif
 endif
 
 .PHONY: build
