@@ -1,0 +1,114 @@
+# BUILD_TARGET selects where `make build` runs. `local` (the default) uses the
+# local Docker daemon; any other value must name a kubectl context and builds
+# inside that cluster as a Job rendered from hack/build-job.yaml.
+BUILD_TARGET ?= local
+BUILD_NAMESPACE ?= build
+BUILD_TIMEOUT ?= 3600
+BUILD_REPO_URL ?= https://github.com/$(IMAGE).git
+BUILD_DOCKERFILE ?= Dockerfile
+BUILD_PUSH_SECRET ?= buildkit-push
+
+# What the Job clones. VERSION cannot serve: it defaults to the newest tag
+# repo-wide, so a build from a branch or an untagged tree would ask the Job to
+# clone a ref that does not exist. BUILD_REF keeps the real ref and is
+# independent of the tag the image is pushed under.
+# `git rev-parse --abbrev-ref` prints the literal "HEAD" in a detached checkout —
+# the state after `git checkout <tag>`, which is the release flow this exists to
+# move onto a cluster — so fall back to the commit SHA, which the Job can fetch.
+BUILD_REF ?= $(shell git symbolic-ref -q --short HEAD || git rev-parse HEAD)
+
+# The image tag. $(VERSION) is this repo's own convention — check-version-tag
+# enforces that a vX.Y.Z image is built from the vX.Y.Z tag — and the remote arm
+# keeps it, because the tag is what a release deploys. A scratch verification passes
+# VERSION=<scratch> together with ALLOW_UNTAGGED_BUILD=1, which is the only way past
+# the guard on either arm.
+BUILD_TAG ?= $(VERSION)
+
+# check-version-tag runs on BOTH arms. It is the only thing stopping a remote build
+# from republishing a released tag with unreleased code, because $(BUILD_TAG) defaults
+# to $(VERSION) — the newest tag repo-wide, not the tag HEAD is at — so a remote build
+# from a feature branch would otherwise overwrite the release image. A Job cloning a
+# ref is exactly the case that needs the guard, not the case that is exempt from it.
+# check-go-mod stays local-only: it vendors on the Mac, into a directory the Job cannot
+# see, and the Dockerfile builds with -mod=mod anyway.
+BUILD_PREREQS := check-version-tag
+ifeq ($(BUILD_TARGET),local)
+BUILD_PREREQS += check-go-mod
+endif
+
+# A make value reaches the shell by textual substitution, and the shell re-expands $(…)
+# and backticks even inside double quotes — so refusing only the quote characters is not
+# enough: '$', '(', ')' and '`' are all legal in a git refname and all re-expand. This
+# is evaluated at PARSE time, before any target, because a recipe-line guard runs too
+# late: check-version-tag, upload and clean render the same values and would already
+# have run. Any shell-active character in any of them refuses the whole invocation.
+BUILD_VALUES = $(BUILD_TARGET)$(BUILD_NAMESPACE)$(BUILD_REPO_URL)$(BUILD_REF)$(BUILD_TAG)$(BRANCH)$(BUILD_DOCKERFILE)$(DOCKER_REGISTRY)$(IMAGE)$(BUILD_PUSH_SECRET)$(BUILD_TIMEOUT)
+SHELL_ACTIVE := ' " $$ ` \ ( ) ; & | < > ! *
+# Scoped to the goals that render these values. BUILD_REF and BRANCH default to the
+# current branch name, and an ordinary refname may legally contain '(' or '!', so an
+# unscoped check would abort `make test` on a branch called feat/a(b). Evaluating at
+# parse time still puts it ahead of every prerequisite, which a recipe-line guard does
+# not — check-version-tag renders the same values and would already have run.
+ifneq ($(filter build upload clean buca,$(MAKECMDGOALS)),)
+ifneq ($(strip $(foreach c,$(SHELL_ACTIVE),$(findstring $(c),$(BUILD_VALUES)))),)
+$(error a build value contains a shell metacharacter; refusing to build)
+endif
+endif
+
+.PHONY: build
+build: $(BUILD_PREREQS)
+ifeq ($(BUILD_TARGET),local)
+	DOCKER_BUILDKIT=1 \
+	docker build \
+	--no-cache \
+	--rm=true \
+	--platform=linux/amd64 \
+	--build-arg DOCKER_REGISTRY="$(DOCKER_REGISTRY)" \
+	--build-arg BRANCH="$(BRANCH)" \
+	--build-arg BUILD_GIT_VERSION=$$(git describe --tags --always --dirty) \
+	--build-arg BUILD_GIT_COMMIT=$$(git rev-parse --short HEAD) \
+	--build-arg BUILD_DATE=$$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+	-t "$(DOCKER_REGISTRY)/$(IMAGE):$(BUILD_TAG)" \
+	-f "$(BUILD_DOCKERFILE)" .
+else
+	BUILD_TARGET='$(BUILD_TARGET)' \
+	NAMESPACE='$(BUILD_NAMESPACE)' \
+	REPO_URL='$(BUILD_REPO_URL)' \
+	REF='$(BUILD_REF)' \
+	TAG='$(BUILD_TAG)' \
+	DOCKERFILE='$(BUILD_DOCKERFILE)' \
+	IMAGE='$(DOCKER_REGISTRY)/$(IMAGE)' \
+	DOCKER_REGISTRY='$(DOCKER_REGISTRY)' \
+	PUSH='true' \
+	PUSH_SECRET='$(BUILD_PUSH_SECRET)' \
+	TIMEOUT='$(BUILD_TIMEOUT)' \
+	hack/build-cluster.sh
+endif
+
+# A remote target pushes from inside the cluster and never loads the image on
+# this machine, so there is nothing here to push and nothing to remove. Guard
+# both, or `make buca BUILD_TARGET=<cluster>` fails at the push step after a
+# build that actually succeeded — with "An image does not exist locally".
+.PHONY: upload
+upload:
+ifeq ($(BUILD_TARGET),local)
+	docker push "$(DOCKER_REGISTRY)/$(IMAGE):$(BUILD_TAG)"
+endif
+
+.PHONY: clean
+clean:
+ifeq ($(BUILD_TARGET),local)
+	docker rmi "$(DOCKER_REGISTRY)/$(IMAGE):$(BUILD_TAG)" || true
+	docker builder prune --max-used-space 21474836480 -f || true
+	rm -rf vendor
+endif
+
+.PHONY: apply
+apply:
+	@for i in $(DIRS); do \
+		echo "apply $${i}"; \
+		make -C $$i apply; \
+	done
+
+.PHONY: buca
+buca: build upload clean apply

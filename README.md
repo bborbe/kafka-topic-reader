@@ -160,6 +160,44 @@ make upload        # Push Docker image to registry
 make clean         # Remove Docker image
 ```
 
+`make build` runs on the local Docker daemon by default. Set `BUILD_TARGET` to a
+kubectl context to build in a cluster instead, so the build does not need a local
+daemon:
+
+```bash
+make build BUILD_TARGET=nukedev     # build as a Kubernetes Job and push from there
+make build BUILD_TARGET=sun         # aliases: sun, nukedev, nukeprod
+```
+
+The aliases resolve to their own kubeconfig files; any other value is used as a
+plain kubectl context. A remote build pushes the image itself, so `upload` and
+`clean` become no-ops. The Job mounts the push credential from a
+`kubernetes.io/dockerconfigjson` secret, which `hack/build-cluster-bootstrap.sh`
+provisions into the `build` namespace once per cluster:
+
+```bash
+hack/build-cluster-bootstrap.sh nukedev
+```
+
+Run the bootstrap with the same `BUILD_NAMESPACE` and `BUILD_PUSH_SECRET` you build
+with — it reads both from its environment. A mismatch provisions the secret into one
+namespace while the Job looks for it in another, and the pod fails on a missing secret.
+
+`check-version-tag` applies to both arms. The image is tagged `$(VERSION)`, which
+defaults to the newest tag repo-wide rather than the tag HEAD is at, so a remote
+build from an untagged tree would republish a release tag with unreleased code. The
+guard refuses unless HEAD is exactly that tag; `ALLOW_UNTAGGED_BUILD=1` overrides it
+for a scratch build:
+
+```bash
+make build BUILD_TARGET=nukedev VERSION=scratch-$(git rev-parse --short HEAD) ALLOW_UNTAGGED_BUILD=1
+```
+
+The ref the Job clones must be pushed — it fetches from GitHub, not from this working
+copy. The remote arm also derives `BUILD_DATE` from the commit's own epoch and passes
+`rewrite-timestamp`, so the same commit yields a stable digest there while the local
+arm stamps wall-clock time; the image tag is the deploy identity, not the digest.
+
 ## Architecture
 
 The service is built using:

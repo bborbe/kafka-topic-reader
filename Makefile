@@ -11,6 +11,14 @@ include tools.env
 .PHONY: default
 default: precommit
 
+# The docker targets live in their own file so the BUILD_TARGET switch sits next to
+# the commands it guards. Included after `default`, not before it: make takes its
+# default goal from the first target it reads, so an include above this rule would
+# silently make `build` what a bare `make` runs — and a bare `make` here must stay
+# `precommit`. The include reads DOCKER_REGISTRY, IMAGE, VERSION and DIRS, all
+# defined above it.
+include Makefile.docker
+
 .PHONY: precommit
 precommit: ensure format generate test check addlicense
 	@echo "ready to commit"
@@ -98,37 +106,30 @@ trivy:
 addlicense:
 	go run github.com/google/addlicense@$(ADDLICENSE_VERSION) -c "Benjamin Borbe" -y $$(date +'%Y') -l bsd $$(find . -name "*.go" -not -path './vendor/*')
 
-.PHONY: buca
-buca: build upload clean apply
-
-
-.PHONY: build
-build: check-version-tag check-go-mod
-	DOCKER_BUILDKIT=1 \
-	docker build \
-	--no-cache \
-	--rm=true \
-	--platform=linux/amd64 \
-	--build-arg DOCKER_REGISTRY=$(DOCKER_REGISTRY) \
-	--build-arg BRANCH=$(BRANCH) \
-	--build-arg BUILD_GIT_VERSION=$$(git describe --tags --always --dirty) \
-	--build-arg BUILD_GIT_COMMIT=$$(git rev-parse --short HEAD) \
-	--build-arg BUILD_DATE=$$(date -u +%Y-%m-%dT%H:%M:%SZ) \
-	-t $(DOCKER_REGISTRY)/$(IMAGE):$(VERSION) \
-	-f Dockerfile .
-
 .PHONY: check-version-tag
 check-version-tag:
 	@if [ -n "$(ALLOW_UNTAGGED_BUILD)" ]; then \
 		echo "ALLOW_UNTAGGED_BUILD set — skipping version/tag check"; \
 	else \
 		head_tag=$$(git describe --tags --exact-match HEAD 2>/dev/null); \
-		if [ "$$head_tag" != "$(VERSION)" ]; then \
-			echo "ERROR: refusing to build $(VERSION) from this tree." >&2; \
+		if [ "$$head_tag" != "$(BUILD_TAG)" ]; then \
+			echo "ERROR: refusing to build $(BUILD_TAG) from this tree." >&2; \
 			echo "  HEAD is at tag: $${head_tag:-<untagged>}" >&2; \
-			echo "  building as:    $(VERSION)" >&2; \
+			echo "  building as:    $(BUILD_TAG)" >&2; \
 			echo "  An image stamped vX.Y.Z must be built from the vX.Y.Z tag." >&2; \
-			echo "  Fix: git checkout $(VERSION)   (or set ALLOW_UNTAGGED_BUILD=1 for a scratch build)" >&2; \
+			echo "  This applies to BUILD_TARGET too: a remote build would push $(BUILD_TAG)" >&2; \
+			echo "  — the newest tag repo-wide — from whatever ref HEAD is at." >&2; \
+			echo "  Fix: git checkout $(BUILD_TAG)   (or set ALLOW_UNTAGGED_BUILD=1 for a scratch build)" >&2; \
+			exit 1; \
+		fi; \
+		ref_commit=$$(git rev-parse --verify --quiet "$(BUILD_REF)^{commit}"); \
+		tag_commit=$$(git rev-parse --verify --quiet "$(BUILD_TAG)^{commit}"); \
+		if [ -n "$$ref_commit" ] && [ -n "$$tag_commit" ] && [ "$$ref_commit" != "$$tag_commit" ]; then \
+			echo "ERROR: BUILD_REF $(BUILD_REF) is not $(BUILD_TAG)." >&2; \
+			echo "  $(BUILD_TAG) is at: $${tag_commit}" >&2; \
+			echo "  $(BUILD_REF) is at: $${ref_commit}" >&2; \
+			echo "  A remote build clones BUILD_REF and pushes it as $(BUILD_TAG), so the" >&2; \
+			echo "  tag would name a commit it does not contain. Unset BUILD_REF to use HEAD." >&2; \
 			exit 1; \
 		fi; \
 	fi
@@ -142,29 +143,6 @@ check-go-mod:
 		echo "go.mod not found, skipping go mod vendor."; \
 	fi
 
-
-.PHONY: upload
-upload:
-	docker push $(DOCKER_REGISTRY)/$(IMAGE):$(VERSION)
-
-.PHONY: clean
-clean:
-	docker rmi $(DOCKER_REGISTRY)/$(IMAGE):$(VERSION) || true
-	# docker builder prune -a -f
-	docker builder prune --max-used-space 21474836480 -f || true
-	rm -rf vendor
-
-.PHONY: apply
-apply:
-	@for i in $(DIRS); do \
-		cd $$i; \
-		echo "apply $${i}"; \
-		make apply; \
-		cd ..; \
-	done
-
-.PHONY: buca
-buca: build upload clean apply
 
 .PHONY: fix
 fix:

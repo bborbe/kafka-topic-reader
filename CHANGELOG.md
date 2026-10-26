@@ -8,6 +8,15 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## Unreleased
+
+- feat: `BUILD_TARGET` selects where `make build` runs — `local` (the default) keeps the Docker daemon, any other value builds in that cluster as a Job from `hack/build-job.yaml`, so a release image no longer needs the Mac. `check-version-tag` applies to both arms: the image is tagged `$(VERSION)`, the newest tag repo-wide, so without it a remote build from an untagged tree would republish a released tag with unreleased code
+- fix: the push secret is applied with `--server-side`, so client-side apply can no longer copy `.data.dockerconfigjson` into the `last-applied-configuration` annotation, where it outlived a rotation and was exported by tooling that redacts `.data` but not annotations. The build-value guard is also scoped to the build goals now, so a branch named `feat/a(b)` no longer aborts `make test`
+- fix: the build refuses any value carrying a shell-active character, checked at make parse time so it covers every target. A git refname may legally contain `'`, `"`, `;`, `$` and backticks, and the shell re-expands `$(…)` even inside double quotes, so a branch or tag named `feat/x'; cmd; '` or `v1$(id)` would have run a command on the operator's host before `hack/build-cluster.sh`'s own whitelist was reached. A recipe-line guard ran too late — `check-version-tag`, `upload` and `clean` render the same values and would already have run
+- fix: the single-quote guard covers both arms, not just the remote one. The local arm pastes `BRANCH` and `BUILD_TAG` into `docker build` unquoted, where a refname containing `;` alone was enough to run a command; its values are quoted now and the guard sits above the arm split. `check-version-tag` also refuses a `BUILD_REF` that resolves to a different commit than the tag it would push, so `BUILD_REF=main` from a tagged tree can no longer publish `main` as `vX.Y.Z`
+- fix: a finished build Job is replaced rather than blocking the next build of the same tag. It keeps its name for `ttlSecondsAfterFinished` (24h), so the previous outright refusal made the retry after a failed build impossible without a manual `kubectl delete job`; a still-running Job is still refused. `TIMEOUT` now goes through the same newline-rejecting check as every other rendered value, and an ambient `SOURCE_DATE_EPOCH` that disagrees with the commit fails on the Mac instead of inside the cluster
+- refactor: the docker targets move from `Makefile` into `Makefile.docker`, so the `BUILD_TARGET` switch sits next to the commands it guards
+
 ## v1.6.39
 
 - chore: update github.com/bborbe/run to v1.11.5
