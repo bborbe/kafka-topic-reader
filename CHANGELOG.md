@@ -8,6 +8,11 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## Unreleased
+
+- feat: `BUILD_TARGET` selects where `make build` runs — `local` (the default) keeps the Docker daemon, any other value builds in that cluster as a Job from `hack/build-job.yaml`, so a release image no longer needs the Mac
+- refactor: the docker targets move from `Makefile` into `Makefile.docker`, so the `BUILD_TARGET` switch sits next to the commands it guards
+
 ## v1.6.39
 
 - chore: update github.com/bborbe/run to v1.11.5

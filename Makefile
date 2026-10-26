@@ -8,6 +8,11 @@ endif
 
 include tools.env
 
+# The docker targets live in their own file so the BUILD_TARGET switch sits next
+# to the commands it guards. Included after tools.env: it reads DOCKER_REGISTRY,
+# IMAGE and VERSION, all defined above this line.
+include Makefile.docker
+
 .PHONY: default
 default: precommit
 
@@ -98,25 +103,6 @@ trivy:
 addlicense:
 	go run github.com/google/addlicense@$(ADDLICENSE_VERSION) -c "Benjamin Borbe" -y $$(date +'%Y') -l bsd $$(find . -name "*.go" -not -path './vendor/*')
 
-.PHONY: buca
-buca: build upload clean apply
-
-
-.PHONY: build
-build: check-version-tag check-go-mod
-	DOCKER_BUILDKIT=1 \
-	docker build \
-	--no-cache \
-	--rm=true \
-	--platform=linux/amd64 \
-	--build-arg DOCKER_REGISTRY=$(DOCKER_REGISTRY) \
-	--build-arg BRANCH=$(BRANCH) \
-	--build-arg BUILD_GIT_VERSION=$$(git describe --tags --always --dirty) \
-	--build-arg BUILD_GIT_COMMIT=$$(git rev-parse --short HEAD) \
-	--build-arg BUILD_DATE=$$(date -u +%Y-%m-%dT%H:%M:%SZ) \
-	-t $(DOCKER_REGISTRY)/$(IMAGE):$(VERSION) \
-	-f Dockerfile .
-
 .PHONY: check-version-tag
 check-version-tag:
 	@if [ -n "$(ALLOW_UNTAGGED_BUILD)" ]; then \
@@ -142,29 +128,6 @@ check-go-mod:
 		echo "go.mod not found, skipping go mod vendor."; \
 	fi
 
-
-.PHONY: upload
-upload:
-	docker push $(DOCKER_REGISTRY)/$(IMAGE):$(VERSION)
-
-.PHONY: clean
-clean:
-	docker rmi $(DOCKER_REGISTRY)/$(IMAGE):$(VERSION) || true
-	# docker builder prune -a -f
-	docker builder prune --max-used-space 21474836480 -f || true
-	rm -rf vendor
-
-.PHONY: apply
-apply:
-	@for i in $(DIRS); do \
-		cd $$i; \
-		echo "apply $${i}"; \
-		make apply; \
-		cd ..; \
-	done
-
-.PHONY: buca
-buca: build upload clean apply
 
 .PHONY: fix
 fix:
