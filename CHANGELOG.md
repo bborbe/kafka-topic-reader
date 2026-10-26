@@ -11,6 +11,7 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 ## Unreleased
 
 - feat: `BUILD_TARGET` selects where `make build` runs — `local` (the default) keeps the Docker daemon, any other value builds in that cluster as a Job from `hack/build-job.yaml`, so a release image no longer needs the Mac. `check-version-tag` applies to both arms: the image is tagged `$(VERSION)`, the newest tag repo-wide, so without it a remote build from an untagged tree would republish a released tag with unreleased code
+- fix: the remote build arm refuses to interpolate a value carrying a single quote into its shell assignment. A git refname may legally contain `'` and `;`, so a branch named `feat/x'; cmd; '` would have run `cmd` on the operator's host before `hack/build-cluster.sh`'s own whitelist was reached — the Makefile pastes values into the shell line, and that happens first
 - fix: a finished build Job is replaced rather than blocking the next build of the same tag. It keeps its name for `ttlSecondsAfterFinished` (24h), so the previous outright refusal made the retry after a failed build impossible without a manual `kubectl delete job`; a still-running Job is still refused. `TIMEOUT` now goes through the same newline-rejecting check as every other rendered value, and an ambient `SOURCE_DATE_EPOCH` that disagrees with the commit fails on the Mac instead of inside the cluster
 - refactor: the docker targets move from `Makefile` into `Makefile.docker`, so the `BUILD_TARGET` switch sits next to the commands it guards
 

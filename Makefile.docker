@@ -36,6 +36,12 @@ ifeq ($(BUILD_TARGET),local)
 BUILD_PREREQS += check-go-mod
 endif
 
+# A make value reaches the shell by textual substitution, so one carrying a single
+# quote would close its assignment and the remainder would run as shell — a branch
+# named `feat/x'; cmd; '` would execute cmd on the operator's host, and both quotes
+# and semicolons are legal in a git refname. hack/build-cluster.sh whitelists every
+# value it renders, but that check runs after the shell has already parsed this line,
+# so the quote is refused here, before it is interpolated.
 .PHONY: build
 build: $(BUILD_PREREQS)
 ifeq ($(BUILD_TARGET),local)
@@ -52,6 +58,7 @@ ifeq ($(BUILD_TARGET),local)
 	-t $(DOCKER_REGISTRY)/$(IMAGE):$(BUILD_TAG) \
 	-f $(BUILD_DOCKERFILE) .
 else
+	@$(if $(findstring ',$(BUILD_TARGET)$(BUILD_NAMESPACE)$(BUILD_REPO_URL)$(BUILD_REF)$(BUILD_TAG)$(BUILD_DOCKERFILE)$(DOCKER_REGISTRY)$(IMAGE)$(BUILD_PUSH_SECRET)$(BUILD_TIMEOUT)),$(error a build value contains a single quote; refusing to interpolate it into a shell command),)
 	BUILD_TARGET='$(BUILD_TARGET)' \
 	NAMESPACE='$(BUILD_NAMESPACE)' \
 	REPO_URL='$(BUILD_REPO_URL)' \
