@@ -179,6 +179,10 @@ provisions into the `build` namespace once per cluster:
 hack/build-cluster-bootstrap.sh nukedev
 ```
 
+Run the bootstrap with the same `BUILD_NAMESPACE` and `BUILD_PUSH_SECRET` you build
+with — it reads both from its environment. A mismatch provisions the secret into one
+namespace while the Job looks for it in another, and the pod fails on a missing secret.
+
 `check-version-tag` applies to both arms. The image is tagged `$(VERSION)`, which
 defaults to the newest tag repo-wide rather than the tag HEAD is at, so a remote
 build from an untagged tree would republish a release tag with unreleased code. The

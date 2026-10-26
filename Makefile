@@ -122,6 +122,16 @@ check-version-tag:
 			echo "  Fix: git checkout $(BUILD_TAG)   (or set ALLOW_UNTAGGED_BUILD=1 for a scratch build)" >&2; \
 			exit 1; \
 		fi; \
+		ref_commit=$$(git rev-parse --verify --quiet "$(BUILD_REF)^{commit}"); \
+		tag_commit=$$(git rev-parse --verify --quiet "$(BUILD_TAG)^{commit}"); \
+		if [ -n "$$ref_commit" ] && [ -n "$$tag_commit" ] && [ "$$ref_commit" != "$$tag_commit" ]; then \
+			echo "ERROR: BUILD_REF $(BUILD_REF) is not $(BUILD_TAG)." >&2; \
+			echo "  $(BUILD_TAG) is at: $${tag_commit}" >&2; \
+			echo "  $(BUILD_REF) is at: $${ref_commit}" >&2; \
+			echo "  A remote build clones BUILD_REF and pushes it as $(BUILD_TAG), so the" >&2; \
+			echo "  tag would name a commit it does not contain. Unset BUILD_REF to use HEAD." >&2; \
+			exit 1; \
+		fi; \
 	fi
 
 .PHONY: check-go-mod
