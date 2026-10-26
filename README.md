@@ -179,6 +179,21 @@ provisions into the `build` namespace once per cluster:
 hack/build-cluster-bootstrap.sh nukedev
 ```
 
+`check-version-tag` applies to both arms. The image is tagged `$(VERSION)`, which
+defaults to the newest tag repo-wide rather than the tag HEAD is at, so a remote
+build from an untagged tree would republish a release tag with unreleased code. The
+guard refuses unless HEAD is exactly that tag; `ALLOW_UNTAGGED_BUILD=1` overrides it
+for a scratch build:
+
+```bash
+make build BUILD_TARGET=nukedev VERSION=scratch-$(git rev-parse --short HEAD) ALLOW_UNTAGGED_BUILD=1
+```
+
+The ref the Job clones must be pushed — it fetches from GitHub, not from this working
+copy. The remote arm also derives `BUILD_DATE` from the commit's own epoch and passes
+`rewrite-timestamp`, so the same commit yields a stable digest there while the local
+arm stamps wall-clock time; the image tag is the deploy identity, not the digest.
+
 ## Architecture
 
 The service is built using:

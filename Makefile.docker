@@ -24,12 +24,16 @@ BUILD_REF ?= $(shell git symbolic-ref -q --short HEAD || git rev-parse HEAD)
 # because the Job clones a ref rather than checking out a tag.
 BUILD_TAG ?= $(VERSION)
 
-# Both gates are local-arm only. check-version-tag refuses a tree that is not
-# the version's tag, which a Job cloning a ref never is. check-go-mod vendors on
-# the Mac, into a directory the Job cannot see — and the Dockerfile builds with
-# -mod=mod, so the Job needs no vendor tree at all.
+# check-version-tag runs on BOTH arms. It is the only thing stopping a remote build
+# from republishing a released tag with unreleased code, because $(BUILD_TAG) defaults
+# to $(VERSION) — the newest tag repo-wide, not the tag HEAD is at — so a remote build
+# from a feature branch would otherwise overwrite the release image. A Job cloning a
+# ref is exactly the case that needs the guard, not the case that is exempt from it.
+# check-go-mod stays local-only: it vendors on the Mac, into a directory the Job cannot
+# see, and the Dockerfile builds with -mod=mod anyway.
+BUILD_PREREQS := check-version-tag
 ifeq ($(BUILD_TARGET),local)
-BUILD_PREREQS := check-version-tag check-go-mod
+BUILD_PREREQS += check-go-mod
 endif
 
 .PHONY: build
@@ -77,16 +81,14 @@ clean:
 ifeq ($(BUILD_TARGET),local)
 	docker rmi $(DOCKER_REGISTRY)/$(IMAGE):$(BUILD_TAG) || true
 	docker builder prune --max-used-space 21474836480 -f || true
-endif
 	rm -rf vendor
+endif
 
 .PHONY: apply
 apply:
 	@for i in $(DIRS); do \
-		cd $$i; \
 		echo "apply $${i}"; \
-		make apply; \
-		cd ..; \
+		make -C $$i apply; \
 	done
 
 .PHONY: buca

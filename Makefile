@@ -8,13 +8,16 @@ endif
 
 include tools.env
 
-# The docker targets live in their own file so the BUILD_TARGET switch sits next
-# to the commands it guards. Included after tools.env: it reads DOCKER_REGISTRY,
-# IMAGE and VERSION, all defined above this line.
-include Makefile.docker
-
 .PHONY: default
 default: precommit
+
+# The docker targets live in their own file so the BUILD_TARGET switch sits next to
+# the commands it guards. Included after `default`, not before it: make takes its
+# default goal from the first target it reads, so an include above this rule would
+# silently make `build` what a bare `make` runs — and a bare `make` here must stay
+# `precommit`. The include reads DOCKER_REGISTRY, IMAGE, VERSION and DIRS, all
+# defined above it.
+include Makefile.docker
 
 .PHONY: precommit
 precommit: ensure format generate test check addlicense
@@ -109,12 +112,14 @@ check-version-tag:
 		echo "ALLOW_UNTAGGED_BUILD set — skipping version/tag check"; \
 	else \
 		head_tag=$$(git describe --tags --exact-match HEAD 2>/dev/null); \
-		if [ "$$head_tag" != "$(VERSION)" ]; then \
-			echo "ERROR: refusing to build $(VERSION) from this tree." >&2; \
+		if [ "$$head_tag" != "$(BUILD_TAG)" ]; then \
+			echo "ERROR: refusing to build $(BUILD_TAG) from this tree." >&2; \
 			echo "  HEAD is at tag: $${head_tag:-<untagged>}" >&2; \
-			echo "  building as:    $(VERSION)" >&2; \
+			echo "  building as:    $(BUILD_TAG)" >&2; \
 			echo "  An image stamped vX.Y.Z must be built from the vX.Y.Z tag." >&2; \
-			echo "  Fix: git checkout $(VERSION)   (or set ALLOW_UNTAGGED_BUILD=1 for a scratch build)" >&2; \
+			echo "  This applies to BUILD_TARGET too: a remote build would push $(BUILD_TAG)" >&2; \
+			echo "  — the newest tag repo-wide — from whatever ref HEAD is at." >&2; \
+			echo "  Fix: git checkout $(BUILD_TAG)   (or set ALLOW_UNTAGGED_BUILD=1 for a scratch build)" >&2; \
 			exit 1; \
 		fi; \
 	fi
