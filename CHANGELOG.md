@@ -8,7 +8,7 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
-## Unreleased
+## v1.7.0
 
 - feat: `BUILD_TARGET` selects where `make build` runs — `local` (the default) keeps the Docker daemon, any other value builds in that cluster as a Job from `hack/build-job.yaml`, so a release image no longer needs the Mac. `check-version-tag` applies to both arms: the image is tagged `$(VERSION)`, the newest tag repo-wide, so without it a remote build from an untagged tree would republish a released tag with unreleased code
 - fix: the push secret is applied with `--server-side`, so client-side apply can no longer copy `.data.dockerconfigjson` into the `last-applied-configuration` annotation, where it outlived a rotation and was exported by tooling that redacts `.data` but not annotations. The build-value guard is also scoped to the build goals now, so a branch named `feat/a(b)` no longer aborts `make test`
