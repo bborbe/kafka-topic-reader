@@ -8,6 +8,10 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## Unreleased
+
+- chore: update github.com/bborbe/http to v1.26.32, github.com/bborbe/kafka to v1.29.2, github.com/bborbe/service to v1.11.2, github.com/bborbe/time to v1.27.19
+
 ## v1.7.0
 
 - feat: `BUILD_TARGET` selects where `make build` runs — `local` (the default) keeps the Docker daemon, any other value builds in that cluster as a Job from `hack/build-job.yaml`, so a release image no longer needs the Mac. `check-version-tag` applies to both arms: the image is tagged `$(VERSION)`, the newest tag repo-wide, so without it a remote build from an untagged tree would republish a released tag with unreleased code
