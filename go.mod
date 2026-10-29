@@ -6,7 +6,7 @@ require (
 	github.com/IBM/sarama v1.61.1
 	github.com/bborbe/errors v1.6.5
 	github.com/bborbe/http v1.26.32
-	github.com/bborbe/kafka v1.29.5
+	github.com/bborbe/kafka v1.29.6
 	github.com/bborbe/log v1.7.5
 	github.com/bborbe/run v1.11.7
 	github.com/bborbe/sentry v1.10.6
