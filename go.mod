@@ -8,7 +8,7 @@ require (
 	github.com/bborbe/http v1.26.32
 	github.com/bborbe/kafka v1.29.6
 	github.com/bborbe/log v1.7.5
-	github.com/bborbe/run v1.11.7
+	github.com/bborbe/run v1.11.8
 	github.com/bborbe/sentry v1.10.6
 	github.com/bborbe/service v1.11.2
 	github.com/bborbe/time v1.27.21
