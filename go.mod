@@ -23,7 +23,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.5.0 // indirect
 	github.com/bborbe/argument/v2 v2.13.8 // indirect
 	github.com/bborbe/collection v1.21.4 // indirect
-	github.com/bborbe/kv v1.21.25 // indirect
+	github.com/bborbe/kv v1.21.26 // indirect
 	github.com/bborbe/math v1.4.16 // indirect
 	github.com/bborbe/parse v1.12.4 // indirect
 	github.com/bborbe/validation v1.5.6 // indirect
