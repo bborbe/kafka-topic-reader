@@ -8,7 +8,7 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
-## Unreleased
+## v1.7.14
 
 - chore: update github.com/bborbe/http to v1.26.33, github.com/bborbe/kafka to v1.29.12, github.com/bborbe/log to v1.7.8, github.com/bborbe/run to v1.11.10, github.com/bborbe/time to v1.27.26, github.com/onsi/ginkgo/v2 to v2.34.0
 
